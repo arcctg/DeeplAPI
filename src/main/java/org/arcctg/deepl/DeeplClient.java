@@ -3,8 +3,12 @@ package org.arcctg.deepl;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import lombok.SneakyThrows;
+import org.arcctg.json.Job;
+import org.arcctg.json.Sentence;
 
 public class DeeplClient {
     private static final String API_URL = "https://www2.deepl.com/jsonrpc";
@@ -19,12 +23,64 @@ public class DeeplClient {
         return "";
     }
 
+    @SneakyThrows
     public String translate(String text, SourceTargetLangs sourceTargetLangs) {
-        return "";
+        List<Sentence> allSentences = splitText(text);
+        StringBuilder result = new StringBuilder();
+
+        List<String> payloads = buildHandleJobsPayloads(allSentences, sourceTargetLangs);
+
+        return result.toString();
     }
 
-    private List<String> splitText(String text) {
-        return List.of();
+    private List<Sentence> splitText(String text) {
+        List<Sentence> sentences = new ArrayList<>();
+        long idCounter = 1;
+
+        for (String string : text.split("\n+")) {
+            sentences.add(new Sentence(string, idCounter++, ""));
+        }
+
+        return sentences;
+    }
+
+    @SneakyThrows
+    private List<String> buildHandleJobsPayloads(List<Sentence> sentences,
+        SourceTargetLangs sourceTargetLangs) {
+        List<String> payloads = new ArrayList<>();
+        List<Job> allJobs = buildJobs(sentences);
+
+        return payloads;
+    }
+
+    private List<Job> buildJobs(List<Sentence> sentences) {
+        List<Job> jobs = new ArrayList<>();
+
+        for (int i = 0; i < sentences.size(); i++) {
+            Sentence sentence = sentences.get(i);
+
+            List<String> rawEnContextAfter = new ArrayList<>();
+            if (i != sentences.size() - 1) {
+                rawEnContextAfter.add(sentences.get(i + 1).getText());
+            }
+
+            List<String> rawEnContextBefore = new ArrayList<>();
+            int j = i >= 5 ? i - 5 : 0;
+
+            while (j != i && rawEnContextBefore.size() != 5) {
+                rawEnContextBefore.add(sentences.get(j++).getText());
+            }
+
+            jobs.add(Job.builder()
+                .kind("default")
+                .sentences(Collections.singletonList(sentence))
+                .rawEnContextBefore(rawEnContextBefore)
+                .rawEnContextAfter(rawEnContextAfter)
+                .preferredNumBeams(1)
+                .build());
+        }
+
+        return jobs;
     }
 
     @SneakyThrows
