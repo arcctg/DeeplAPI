@@ -1,22 +1,32 @@
 package org.arcctg.deepl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import lombok.SneakyThrows;
+import org.arcctg.json.CommonJobParams;
 import org.arcctg.json.Job;
+import org.arcctg.json.Lang;
+import org.arcctg.json.Params;
+import org.arcctg.json.PayloadTemplate;
+import org.arcctg.json.Preference;
 import org.arcctg.json.Sentence;
+import org.arcctg.json.Weight;
 
 public class DeeplClient {
     private static final String API_URL = "https://www2.deepl.com/jsonrpc";
     private final HttpClient client;
+    private final ObjectMapper objectMapper;
     private Long id = 100_000L;
 
     public DeeplClient() {
         this.client = HttpClient.newBuilder().build();
+        this.objectMapper = new ObjectMapper();
     }
 
     public String getAlternativesAtPosition(int position) {
@@ -26,9 +36,17 @@ public class DeeplClient {
     @SneakyThrows
     public String translate(String text, SourceTargetLangs sourceTargetLangs) {
         List<Sentence> allSentences = splitText(text);
+        List<Job> allJobs = buildJobs(allSentences);
         StringBuilder result = new StringBuilder();
 
-        List<String> payloads = buildHandleJobsPayloads(allSentences, sourceTargetLangs);
+        List<String> translationPayloads = buildPayloadForEachJobBatch(allJobs, sourceTargetLangs);
+
+        for (String payload : translationPayloads) {
+            HttpRequest request = buildRequest(payload);
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            String responseBody = response.body();
+            result.append(responseBody);
+        }
 
         return result.toString();
     }
@@ -45,10 +63,17 @@ public class DeeplClient {
     }
 
     @SneakyThrows
-    private List<String> buildHandleJobsPayloads(List<Sentence> sentences,
+    private List<String> buildPayloadForEachJobBatch(List<Job> allJobs,
         SourceTargetLangs sourceTargetLangs) {
         List<String> payloads = new ArrayList<>();
-        List<Job> allJobs = buildJobs(sentences);
+
+        for (int i = 0; i < allJobs.size(); i += 13) {
+            List<Job> batch = allJobs.subList(i, Math.min(i + 13, allJobs.size()));
+            PayloadTemplate payloadTemplate1 = buildTranslationPayload(batch, sourceTargetLangs);
+            String payload = objectMapper.writeValueAsString(payloadTemplate1);
+
+            payloads.add(payload);
+        }
 
         return payloads;
     }
@@ -81,6 +106,41 @@ public class DeeplClient {
         }
 
         return jobs;
+    }
+
+    private PayloadTemplate buildTranslationPayload(List<Job> jobs, SourceTargetLangs sourceTargetLangs) {
+        Preference preference = Preference.builder()
+            .weight(new Weight())
+            ._default("default")
+            .build();
+
+        Lang lang = Lang.builder()
+            .targetLang(sourceTargetLangs.getTargetLang())
+            .sourceLangComputed(sourceTargetLangs.getSourceLang())
+            .preference(preference)
+            .build();
+
+        CommonJobParams commonJobParams = CommonJobParams.builder()
+            .quality("normal")
+            .mode("translate")
+            .browserType(1)
+            .textType("plaintext")
+            .build();
+
+        Params params = Params.builder()
+            .jobs(jobs)
+            .lang(lang)
+            .commonJobParams(commonJobParams)
+            .priority(1)
+            .timestamp(System.currentTimeMillis())
+            .build();
+
+        return PayloadTemplate.builder()
+            .jsonrpc("2.0")
+            .method("LMT_handle_jobs")
+            .params(params)
+            .id(++id)
+            .build();
     }
 
     @SneakyThrows
