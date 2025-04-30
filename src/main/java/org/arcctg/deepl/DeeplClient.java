@@ -5,17 +5,21 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import lombok.SneakyThrows;
+import org.arcctg.json.Beam;
 import org.arcctg.json.CommonJobParams;
 import org.arcctg.json.Job;
 import org.arcctg.json.Lang;
 import org.arcctg.json.Params;
 import org.arcctg.json.PayloadTemplate;
 import org.arcctg.json.Preference;
+import org.arcctg.json.ResponseTemplate;
 import org.arcctg.json.Sentence;
+import org.arcctg.json.Translation;
 import org.arcctg.json.Weight;
 
 public class DeeplClient {
@@ -44,8 +48,8 @@ public class DeeplClient {
         for (String payload : translationPayloads) {
             HttpRequest request = buildRequest(payload);
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            String responseBody = response.body();
-            result.append(responseBody);
+            String parsedResponse = parseTranslationResponse(response.body());
+            result.append(parsedResponse);
         }
 
         return result.toString();
@@ -144,7 +148,7 @@ public class DeeplClient {
     }
 
     @SneakyThrows
-    private static HttpRequest buildRequest(String payload) {
+    private HttpRequest buildRequest(String payload) {
         return HttpRequest.newBuilder()
             .uri(new URI(API_URL))
             .header("accept", "*/*")
@@ -166,5 +170,22 @@ public class DeeplClient {
                     + "Chrome/133.0.0.0 Safari/537.36")
             .POST(HttpRequest.BodyPublishers.ofString(payload))
             .build();
+    }
+
+    @SneakyThrows
+    private String parseTranslationResponse(String jsonResponse) {
+        ResponseTemplate response = objectMapper.readValue(jsonResponse, ResponseTemplate.class);
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (Translation translation : response.getResult().getTranslations()) {
+            for (Beam beam : translation.getBeams()) {
+                for (Sentence sentence : beam.getSentences()) {
+                    stringBuilder.append(" ").append(new String(sentence.getText().getBytes(),
+                        StandardCharsets.UTF_8));
+                }
+            }
+        }
+
+        return stringBuilder.toString();
     }
 }
