@@ -7,10 +7,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.SneakyThrows;
 import org.arcctg.json.Beam;
+import org.arcctg.json.Chunk;
 import org.arcctg.json.CommonJobParams;
 import org.arcctg.json.Job;
 import org.arcctg.json.Lang;
@@ -19,6 +21,7 @@ import org.arcctg.json.PayloadTemplate;
 import org.arcctg.json.Preference;
 import org.arcctg.json.ResponseTemplate;
 import org.arcctg.json.Sentence;
+import org.arcctg.json.Text;
 import org.arcctg.json.Translation;
 import org.arcctg.json.Weight;
 
@@ -55,15 +58,73 @@ public class DeeplClient {
         return result.toString();
     }
 
+    @SneakyThrows
     private List<Sentence> splitText(String text) {
+        String jsonResponse = sendSplitTextRequest(text);
+
+        ResponseTemplate response = objectMapper.readValue(jsonResponse, ResponseTemplate.class);
+
         List<Sentence> sentences = new ArrayList<>();
         long idCounter = 1;
 
-        for (String string : text.split("\n+")) {
-            sentences.add(new Sentence(string, idCounter++, ""));
+        for (Text textBlock : response.getResult().getTexts()) {
+            for (Chunk chunk : textBlock.getChunks()) {
+                for (Sentence sentence : chunk.getSentences()) {
+                    sentence.setId(idCounter++);
+                    sentences.add(sentence);
+
+                    idCounter = idCounter >= 99 ? 1 : idCounter;
+                }
+            }
         }
 
         return sentences;
+    }
+
+    @SneakyThrows
+    private String sendSplitTextRequest(String text) {
+        String payload = buildSplitTextPayload(text);
+
+        HttpRequest request = buildRequest(payload);
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        return response.body();
+    }
+
+    @SneakyThrows
+    private String buildSplitTextPayload(String text) {
+        List<String> texts = Arrays.stream(text.split("\n+")).map(String::trim).toList();
+
+        CommonJobParams commonJobParams = CommonJobParams.builder()
+            .mode("translate")
+            .textType("plaintext")
+            .build();
+
+        Preference preference = Preference.builder()
+            .weight(new Weight())
+            ._default("default")
+            .build();
+
+        Lang lang = Lang.builder()
+            .langUserSelected("EN")
+            .preference(preference)
+            .build();
+
+        Params params = Params.builder()
+            .texts(texts)
+            .commonJobParams(commonJobParams)
+            .lang(lang)
+            .build();
+
+        PayloadTemplate payloadTemplate1 = PayloadTemplate.builder()
+            .jsonrpc("2.0")
+            .method("LMT_split_text")
+            .params(params)
+            .id(++id)
+            .build();
+
+        return objectMapper.writeValueAsString(payloadTemplate1);
     }
 
     @SneakyThrows
