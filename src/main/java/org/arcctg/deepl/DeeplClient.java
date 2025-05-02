@@ -1,5 +1,7 @@
 package org.arcctg.deepl;
 
+import static org.arcctg.utils.Utility.generateId;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -11,29 +13,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.SneakyThrows;
-import org.arcctg.json.Beam;
-import org.arcctg.json.Chunk;
-import org.arcctg.json.CommonJobParams;
-import org.arcctg.json.Job;
-import org.arcctg.json.Lang;
-import org.arcctg.json.Params;
-import org.arcctg.json.PayloadTemplate;
-import org.arcctg.json.Preference;
-import org.arcctg.json.ResponseTemplate;
-import org.arcctg.json.Sentence;
-import org.arcctg.json.Text;
-import org.arcctg.json.Translation;
-import org.arcctg.json.Weight;
+import org.arcctg.json.*;
 
 public class DeeplClient {
     private static final String API_URL = "https://www2.deepl.com/jsonrpc";
     private final HttpClient client;
     private final ObjectMapper objectMapper;
-    private Long id = 100_000L;
+    private Long id;
 
     public DeeplClient() {
         this.client = HttpClient.newBuilder().build();
         this.objectMapper = new ObjectMapper();
+        this.id = generateId();
     }
 
     public String getAlternativesAtPosition(int position) {
@@ -117,14 +108,22 @@ public class DeeplClient {
             .lang(lang)
             .build();
 
-        PayloadTemplate payloadTemplate1 = PayloadTemplate.builder()
+        PayloadTemplate payloadTemplate = PayloadTemplate.builder()
             .jsonrpc("2.0")
             .method("LMT_split_text")
             .params(params)
             .id(++id)
             .build();
 
-        return objectMapper.writeValueAsString(payloadTemplate1);
+        String payload = objectMapper.writeValueAsString(payloadTemplate);
+
+        return modifyPayloadForDeepl(payload);
+    }
+
+    private String modifyPayloadForDeepl(String payload) {
+        String replacement = ((id + 3) % 13 == 0 || (id + 5) % 29 == 0) ? "method\" : " : "method\": ";
+
+        return payload.replace("method\":", replacement);
     }
 
     @SneakyThrows
@@ -134,8 +133,7 @@ public class DeeplClient {
 
         for (int i = 0; i < allJobs.size(); i += 13) {
             List<Job> batch = allJobs.subList(i, Math.min(i + 13, allJobs.size()));
-            PayloadTemplate payloadTemplate1 = buildTranslationPayload(batch, sourceTargetLangs);
-            String payload = objectMapper.writeValueAsString(payloadTemplate1);
+            String payload = buildTranslationPayload(batch, sourceTargetLangs);
 
             payloads.add(payload);
         }
@@ -173,7 +171,8 @@ public class DeeplClient {
         return jobs;
     }
 
-    private PayloadTemplate buildTranslationPayload(List<Job> jobs, SourceTargetLangs sourceTargetLangs) {
+    @SneakyThrows
+    private String buildTranslationPayload(List<Job> jobs, SourceTargetLangs sourceTargetLangs) {
         Preference preference = Preference.builder()
             .weight(new Weight())
             ._default("default")
@@ -200,12 +199,16 @@ public class DeeplClient {
             .timestamp(System.currentTimeMillis())
             .build();
 
-        return PayloadTemplate.builder()
+        PayloadTemplate payloadTemplate = PayloadTemplate.builder()
             .jsonrpc("2.0")
             .method("LMT_handle_jobs")
             .params(params)
             .id(++id)
             .build();
+
+        String payload = objectMapper.writeValueAsString(payloadTemplate);
+
+        return modifyPayloadForDeepl(payload);
     }
 
     @SneakyThrows
