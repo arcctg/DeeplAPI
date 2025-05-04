@@ -1,6 +1,7 @@
 package org.arcctg.deepl;
 
 import static org.arcctg.utils.Utility.generateId;
+import static org.arcctg.utils.Utility.generateTimestamp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
@@ -126,21 +127,6 @@ public class DeeplClient {
         return payload.replace("method\":", replacement);
     }
 
-    @SneakyThrows
-    private List<String> buildPayloadForEachJobBatch(List<Job> allJobs,
-        SourceTargetLangs sourceTargetLangs) {
-        List<String> payloads = new ArrayList<>();
-
-        for (int i = 0; i < allJobs.size(); i += 13) {
-            List<Job> batch = allJobs.subList(i, Math.min(i + 13, allJobs.size()));
-            String payload = buildTranslationPayload(batch, sourceTargetLangs);
-
-            payloads.add(payload);
-        }
-
-        return payloads;
-    }
-
     private List<Job> buildJobs(List<Sentence> sentences) {
         List<Job> jobs = new ArrayList<>();
 
@@ -172,7 +158,31 @@ public class DeeplClient {
     }
 
     @SneakyThrows
-    private String buildTranslationPayload(List<Job> jobs, SourceTargetLangs sourceTargetLangs) {
+    private List<String> buildPayloadForEachJobBatch(List<Job> allJobs,
+        SourceTargetLangs sourceTargetLangs) {
+        List<String> payloads = new ArrayList<>();
+
+        for (int i = 0; i < allJobs.size(); i += 13) {
+            List<Job> batch = allJobs.subList(i, Math.min(i + 13, allJobs.size()));
+            List<String> batchSentences = extractJobsText(batch);
+            String payload = buildTranslationPayload(batch, sourceTargetLangs, batchSentences);
+
+            payloads.add(payload);
+        }
+
+        return payloads;
+    }
+
+    private List<String> extractJobsText(List<Job> batch) {
+        return batch.stream()
+            .flatMap(job -> job.getSentences().stream())
+            .map(Sentence::getText)
+            .toList();
+    }
+
+    @SneakyThrows
+    private String buildTranslationPayload(List<Job> jobs, SourceTargetLangs sourceTargetLangs,
+        List<String> stringSentences) {
         Preference preference = Preference.builder()
             .weight(new Weight())
             ._default("default")
@@ -196,7 +206,7 @@ public class DeeplClient {
             .lang(lang)
             .commonJobParams(commonJobParams)
             .priority(1)
-            .timestamp(System.currentTimeMillis())
+            .timestamp(generateTimestamp(stringSentences))
             .build();
 
         PayloadTemplate payloadTemplate = PayloadTemplate.builder()
