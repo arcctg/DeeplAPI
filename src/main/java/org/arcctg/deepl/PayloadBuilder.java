@@ -1,5 +1,8 @@
 package org.arcctg.deepl;
 
+import static org.arcctg.utils.Utility.generateId;
+import static org.arcctg.utils.Utility.generateTimestamp;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +28,7 @@ public class PayloadBuilder {
     }
 
     @SneakyThrows
-    public String buildForTextSplitting(String text) {
+    public String buildForTextSegmentation(String text) {
         List<String> texts = Arrays.stream(text.split("\n+")).map(String::trim).toList();
 
         CommonJobParams commonJobParams = CommonJobParams.builder()
@@ -110,12 +113,12 @@ public class PayloadBuilder {
 
     @SneakyThrows
     public List<String> buildForAllSentences(List<Sentence> allSentences,
-        SourceTargetLangs sourceTargetLangs) {
+        SourceTargetLangs langPair) {
         List<String> payloads = new ArrayList<>();
 
         for (List<Job> batch : buildJobsBatches(allSentences)) {
             List<String> batchText = extractBatchText(batch);
-            String payload = buildForTranslation(batch, sourceTargetLangs, batchText);
+            String payload = buildForTranslation(batch, langPair, batchText);
 
             payloads.add(payload);
         }

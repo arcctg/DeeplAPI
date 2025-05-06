@@ -25,40 +25,43 @@ public class DeeplClient {
         return "";
     }
 
+    public String translate(String text, SourceTargetLangs langPair) {
+        List<Sentence> allSentences = getSentencesFromText(text);
 
-    @SneakyThrows
-    public String translate(String text, SourceTargetLangs sourceTargetLangs) {
-        List<Sentence> allSentences = splitText(text);
+        return translateSentences(allSentences, langPair);
+    }
+
+    private String translateSentences(List<Sentence> sentences, SourceTargetLangs langPair) {
         StringBuilder result = new StringBuilder();
-
-        List<String> payloads = payloadBuilder.buildForAllSentences(allSentences, sourceTargetLangs);
+        List<String> payloads = payloadBuilder.buildForAllSentences(sentences, langPair);
 
         for (String payload : payloads) {
             HttpRequest request = buildDefault(payload);
-            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+            HttpResponse<String> response = sendRequest(request);
             String parsedResponse = responseParser.parseTextTranslation(response.body());
 
             result.append(parsedResponse);
         }
 
-        return result.toString();
+        return result.toString().trim();
     }
 
-    @SneakyThrows
-    private List<Sentence> splitText(String text) {
-        String jsonResponse = sendSplitTextRequest(text);
+    private List<Sentence> getSentencesFromText(String text) {
+        String jsonResponse = requestTextSegmentation(text);
 
-        return responseParser.parseTextSplitting(jsonResponse);
+        return responseParser.parseTextSegmentation(jsonResponse);
     }
 
-    @SneakyThrows
-    private String sendSplitTextRequest(String text) {
-        String payload = payloadBuilder.buildForTextSplitting(text);
-
+    private String requestTextSegmentation(String text) {
+        String payload = payloadBuilder.buildForTextSegmentation(text);
         HttpRequest request = buildDefault(payload);
-
-        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+        HttpResponse<String> response = sendRequest(request);
 
         return response.body();
+    }
+
+    @SneakyThrows
+    private HttpResponse<String> sendRequest(HttpRequest request) {
+        return client.send(request, BodyHandlers.ofString());
     }
 }

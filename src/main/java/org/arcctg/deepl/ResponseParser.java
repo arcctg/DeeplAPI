@@ -9,6 +9,7 @@ import org.arcctg.json.Beam;
 import org.arcctg.json.Chunk;
 import org.arcctg.json.ResponseTemplate;
 import org.arcctg.json.Sentence;
+import org.arcctg.json.Text;
 import org.arcctg.json.Translation;
 
 public class ResponseParser {
@@ -19,7 +20,7 @@ public class ResponseParser {
     }
 
     @SneakyThrows
-    public List<Sentence> parseTextSplitting(String jsonResponse) {
+    public List<Sentence> parseTextSegmentation(String jsonResponse) {
         checkForException(jsonResponse);
 
         ResponseTemplate response = objectMapper.readValue(jsonResponse, ResponseTemplate.class);
