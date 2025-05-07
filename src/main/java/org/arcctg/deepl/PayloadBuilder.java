@@ -4,6 +4,7 @@ import static org.arcctg.utils.Utility.generateId;
 import static org.arcctg.utils.Utility.generateTimestamp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -126,42 +127,68 @@ public class PayloadBuilder {
         return payloads;
     }
 
-    private List<List<Job>> buildJobsBatches(List<Sentence> sentences) {
+    private List<List<Job>> buildJobsBatches(List<Sentence> allSentences) {
         List<List<Job>> jobBatchesList = new ArrayList<>();
         List<Job> jobBatch = new ArrayList<>();
 
-        for (int i = 0; i < sentences.size(); i++) {
-            Sentence sentence = sentences.get(i);
+        for (int i = 0; i < allSentences.size(); i++) {
+            Job job = createJobForSentence(i, allSentences);
 
-            List<String> rawEnContextAfter = new ArrayList<>();
-            if (i != sentences.size() - 1) {
-                rawEnContextAfter.add(sentences.get(i + 1).getText());
-            }
-
-            List<String> rawEnContextBefore = new ArrayList<>();
-            int j = i >= 5 ? i - 5 : 0;
-
-            while (j != i && rawEnContextBefore.size() != 5) {
-                rawEnContextBefore.add(sentences.get(j++).getText());
-            }
-
-            Job job = Job.builder()
-                .kind("default")
-                .sentences(Collections.singletonList(sentence))
-                .rawEnContextBefore(rawEnContextBefore)
-                .rawEnContextAfter(rawEnContextAfter)
-                .preferredNumBeams(1)
-                .build();
-
-            jobBatch.add(job);
-
-            if (jobBatch.size() == 13 || i == sentences.size() - 1) {
+            if (getBytesLength(jobBatch, job) > 32_000) {
                 jobBatchesList.add(jobBatch);
                 jobBatch = new ArrayList<>();
             }
+
+            jobBatch.add(job);
+        }
+
+        if (!jobBatch.isEmpty()) {
+            jobBatchesList.add(jobBatch);
         }
 
         return jobBatchesList;
+    }
+
+    private Job createJobForSentence(int sentenceIndex, List<Sentence> allSentences) {
+        List<String> rawEnContextAfter = createContextAfter(sentenceIndex, allSentences);
+        List<String> rawEnContextBefore = createContextBefore(sentenceIndex, allSentences);
+
+        return Job.builder()
+            .kind("default")
+            .sentences(Collections.singletonList(allSentences.get(sentenceIndex)))
+            .rawEnContextBefore(rawEnContextBefore)
+            .rawEnContextAfter(rawEnContextAfter)
+            .preferredNumBeams(1)
+            .build();
+    }
+
+    private List<String> createContextAfter(int sentenceIndex, List<Sentence> allSentences) {
+        List<String> rawEnContextAfter = new ArrayList<>();
+
+        if (sentenceIndex != allSentences.size() - 1) {
+            rawEnContextAfter.add(allSentences.get(sentenceIndex + 1).getText());
+        }
+
+        return rawEnContextAfter;
+    }
+
+    private List<String> createContextBefore(int sentenceIndex, List<Sentence> allSentences) {
+        List<String> rawEnContextBefore = new ArrayList<>();
+        int j = sentenceIndex >= 5 ? sentenceIndex - 5 : 0;
+
+        while (j != sentenceIndex && rawEnContextBefore.size() != 5) {
+            rawEnContextBefore.add(allSentences.get(j++).getText());
+        }
+
+        return rawEnContextBefore;
+    }
+
+    @SneakyThrows
+    private int getBytesLength(List<Job> jobBatch, Job job) {
+        String batchStr = objectMapper.writeValueAsString(jobBatch);
+        String jobStr = objectMapper.writeValueAsString(job);
+
+        return (batchStr + jobStr).getBytes(StandardCharsets.UTF_8).length;
     }
 
     private List<String> extractBatchText(List<Job> batch) {
