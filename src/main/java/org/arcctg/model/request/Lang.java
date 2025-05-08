@@ -1,4 +1,4 @@
-package org.arcctg.json;
+package org.arcctg.model.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

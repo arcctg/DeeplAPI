@@ -1,20 +1,21 @@
-package org.arcctg.json;
+package org.arcctg.model.request;
 
-import javax.annotation.processing.Generated;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.Getter;
+import lombok.Builder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "name"
+    "weight",
+    "default"
 })
-@Generated("jsonschema2pojo")
-@Getter
-public class RephraseVariant {
+@Builder
+public class Preference {
 
-    @JsonProperty("name")
-    public String name;
+    @JsonProperty("weight")
+    public Weight weight;
+    @JsonProperty("default")
+    public String _default;
 
 }

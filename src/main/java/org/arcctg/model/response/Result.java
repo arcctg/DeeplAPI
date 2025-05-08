@@ -1,32 +1,30 @@
-package org.arcctg.json;
+package org.arcctg.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import java.util.List;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.arcctg.model.request.Lang;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "text",
-    "id",
-    "prefix"
+    "lang",
+    "texts",
+    "translations"
 })
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Sentence {
+@Getter
+public class Result {
 
-    @JsonProperty("text")
-    public String text;
-    @JsonProperty("id")
-    public long id;
-    @JsonProperty("prefix")
-    public String prefix;
+    @JsonProperty("lang")
+    public Lang lang;
+    @JsonProperty("texts")
+    public List<Text> texts;
+    @JsonProperty("translations")
+    public List<Translation> translations;
 
 }

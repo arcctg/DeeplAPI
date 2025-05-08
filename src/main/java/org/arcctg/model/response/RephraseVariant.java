@@ -1,6 +1,5 @@
-package org.arcctg.json;
+package org.arcctg.model.response;
 
-import java.util.List;
 import javax.annotation.processing.Generated;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,19 +8,13 @@ import lombok.Getter;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "sentences",
-    "num_symbols",
-    "rephrase_variant"
+    "name"
 })
 @Generated("jsonschema2pojo")
 @Getter
-public class Beam {
+public class RephraseVariant {
 
-    @JsonProperty("sentences")
-    public List<Sentence> sentences;
-    @JsonProperty("num_symbols")
-    public Long numSymbols;
-    @JsonProperty("rephrase_variant")
-    public RephraseVariant rephraseVariant;
+    @JsonProperty("name")
+    public String name;
 
 }

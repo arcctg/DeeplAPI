@@ -1,6 +1,6 @@
-package org.arcctg.deepl;
+package org.arcctg.deepl.client;
 
-import static org.arcctg.deepl.RequestBuilder.buildDefault;
+import static org.arcctg.deepl.request.RequestBuilder.buildDefault;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -8,7 +8,10 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
 import lombok.SneakyThrows;
-import org.arcctg.json.Sentence;
+import org.arcctg.deepl.request.PayloadBuilder;
+import org.arcctg.deepl.response.ResponseParser;
+import org.arcctg.deepl.model.SourceTargetLangs;
+import org.arcctg.model.common.Sentence;
 
 public class DeeplClient {
     private final HttpClient client;

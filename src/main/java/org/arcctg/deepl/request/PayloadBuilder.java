@@ -1,4 +1,4 @@
-package org.arcctg.deepl;
+package org.arcctg.deepl.request;
 
 import static org.arcctg.utils.Utility.generateId;
 import static org.arcctg.utils.Utility.generateTimestamp;
@@ -10,14 +10,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.SneakyThrows;
-import org.arcctg.json.CommonJobParams;
-import org.arcctg.json.Job;
-import org.arcctg.json.Lang;
-import org.arcctg.json.Params;
-import org.arcctg.json.PayloadTemplate;
-import org.arcctg.json.Preference;
-import org.arcctg.json.Sentence;
-import org.arcctg.json.Weight;
+import org.arcctg.deepl.model.SourceTargetLangs;
+import org.arcctg.model.request.*;
+import org.arcctg.model.common.Sentence;
 
 public class PayloadBuilder {
     private final ObjectMapper objectMapper;

@@ -1,22 +1,21 @@
-package org.arcctg.json;
+package org.arcctg.model.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "EN"
+    "chunks"
 })
-@JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
 @Getter
-public class DetectedLanguages {
+public class Text {
 
-    @JsonProperty("EN")
-    public double en;
+    @JsonProperty("chunks")
+    public List<Chunk> chunks;
 
 }

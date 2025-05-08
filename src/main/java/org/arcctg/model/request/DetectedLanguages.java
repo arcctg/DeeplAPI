@@ -1,5 +1,6 @@
-package org.arcctg.json;
+package org.arcctg.model.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -8,19 +9,14 @@ import lombok.NoArgsConstructor;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "jsonrpc",
-    "id",
-    "result"
+    "EN"
 })
+@JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
 @Getter
-public class ResponseTemplate {
+public class DetectedLanguages {
 
-    @JsonProperty("jsonrpc")
-    public String jsonrpc;
-    @JsonProperty("id")
-    public long id;
-    @JsonProperty("result")
-    public Result result;
+    @JsonProperty("EN")
+    public double en;
 
 }

@@ -1,4 +1,4 @@
-package org.arcctg.deepl;
+package org.arcctg.deepl.model;
 
 import lombok.AllArgsConstructor;
 

@@ -1,16 +1,12 @@
-package org.arcctg.deepl;
+package org.arcctg.deepl.response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.SneakyThrows;
-import org.arcctg.json.Beam;
-import org.arcctg.json.Chunk;
-import org.arcctg.json.ResponseTemplate;
-import org.arcctg.json.Sentence;
-import org.arcctg.json.Text;
-import org.arcctg.json.Translation;
+import org.arcctg.model.response.*;
+import org.arcctg.model.common.Sentence;
 
 public class ResponseParser {
     private final ObjectMapper objectMapper;

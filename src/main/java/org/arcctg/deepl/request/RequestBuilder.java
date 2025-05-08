@@ -1,4 +1,4 @@
-package org.arcctg.deepl;
+package org.arcctg.deepl.request;
 
 import java.net.URI;
 import java.net.http.HttpRequest;

@@ -1,22 +1,22 @@
-package org.arcctg.json;
+package org.arcctg.model.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.List;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.arcctg.model.common.Sentence;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "beams",
-    "quality"
+    "sentences"
 })
+@NoArgsConstructor
 @Getter
-public class Translation {
+public class Chunk {
 
-    @JsonProperty("beams")
-    public List<Beam> beams;
-    @JsonProperty("quality")
-    public String quality;
+    @JsonProperty("sentences")
+    public List<Sentence> sentences;
 
 }
