@@ -8,6 +8,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
 import lombok.SneakyThrows;
+import org.arcctg.cache.translation.TranslationCacheService;
 import org.arcctg.deepl.request.PayloadBuilder;
 import org.arcctg.deepl.response.ResponseParser;
 import org.arcctg.deepl.model.SourceTargetLangs;
@@ -17,21 +18,37 @@ public class DeeplClient {
     private final HttpClient client;
     private final PayloadBuilder payloadBuilder;
     private final ResponseParser responseParser;
+    private final TranslationCacheService cacheService;
 
     public DeeplClient() {
+        this(new TranslationCacheService());
+    }
+
+    public DeeplClient(TranslationCacheService cacheService) {
         this.client = HttpClient.newBuilder().build();
         this.payloadBuilder = new PayloadBuilder();
         this.responseParser = new ResponseParser();
+        this.cacheService = cacheService;
     }
+
 
     public String getAlternativesAtPosition(int position) {
         return "";
     }
 
     public String translate(String text, SourceTargetLangs langPair) {
-        List<Sentence> allSentences = getSentencesFromText(text);
+        String cachedTranslation = cacheService.getCachedTranslation(text, langPair);
+        if (cachedTranslation != null) {
+            System.out.println("Using cached translation for text: " + text);
+            return cachedTranslation;
+        }
 
-        return translateSentences(allSentences, langPair);
+        List<Sentence> allSentences = getSentencesFromText(text);
+        String translation = translateSentences(allSentences, langPair);
+
+        cacheService.cacheTranslation(text, langPair, translation);
+
+        return translation;
     }
 
     private String translateSentences(List<Sentence> sentences, SourceTargetLangs langPair) {
@@ -66,5 +83,13 @@ public class DeeplClient {
     @SneakyThrows
     private HttpResponse<String> sendRequest(HttpRequest request) {
         return client.send(request, BodyHandlers.ofString());
+    }
+
+    public void clearCaches() {
+        cacheService.clearCaches();
+    }
+
+    public int getTranslationCacheSize() {
+        return cacheService.getTranslationCacheSize();
     }
 }
