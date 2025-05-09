@@ -8,6 +8,19 @@
   <artifactId>DeeplAPI</artifactId>
   <version>1.0-SNAPSHOT</version>
 
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Stepan Kostenich</name>
+    </developer>
+  </developers>
+
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
