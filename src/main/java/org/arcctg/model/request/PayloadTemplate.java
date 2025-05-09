@@ -22,6 +22,6 @@ public class PayloadTemplate {
     @JsonProperty("params")
     public Params params;
     @JsonProperty("id")
-    public Long id;
+    public Integer id;
 
 }

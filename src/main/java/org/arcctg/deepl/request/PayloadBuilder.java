@@ -1,6 +1,6 @@
 package org.arcctg.deepl.request;
 
-import static org.arcctg.utils.Utility.generateId;
+import static org.arcctg.utils.Utility.getIdGenerator;
 import static org.arcctg.utils.Utility.generateTimestamp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,14 +13,15 @@ import lombok.SneakyThrows;
 import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.model.request.*;
 import org.arcctg.model.common.Sentence;
+import org.arcctg.utils.IdGenerator;
 
 public class PayloadBuilder {
     private final ObjectMapper objectMapper;
-    private Long id;
+    private final IdGenerator id;
 
     public PayloadBuilder() {
         this.objectMapper = new ObjectMapper();
-        this.id = generateId();
+        this.id = getIdGenerator();
     }
 
     @SneakyThrows
@@ -52,7 +53,7 @@ public class PayloadBuilder {
             .jsonrpc("2.0")
             .method("LMT_split_text")
             .params(params)
-            .id(++id)
+            .id(id.next())
             .build();
 
         String payload = objectMapper.writeValueAsString(payloadTemplate);
@@ -93,7 +94,7 @@ public class PayloadBuilder {
             .jsonrpc("2.0")
             .method("LMT_handle_jobs")
             .params(params)
-            .id(++id)
+            .id(id.next())
             .build();
 
         String payload = objectMapper.writeValueAsString(payloadTemplate);
@@ -102,7 +103,7 @@ public class PayloadBuilder {
     }
 
     private String modifyPayloadForDeepl(String payload) {
-        String replacement = ((id + 3) % 13 == 0 || (id + 5) % 29 == 0) ? "method\" : " : "method\": ";
+        String replacement = ((id.get() + 3) % 13 == 0 || (id.get() + 5) % 29 == 0) ? "method\" : " : "method\": ";
 
         return payload.replace("method\":", replacement);
     }
