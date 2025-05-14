@@ -16,16 +16,13 @@ import org.arcctg.model.common.Sentence;
 import org.arcctg.utils.IdGenerator;
 
 public class PayloadBuilder {
-    private final ObjectMapper objectMapper;
-    private final IdGenerator id;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final IdGenerator id = getIdGenerator();
 
-    public PayloadBuilder() {
-        this.objectMapper = new ObjectMapper();
-        this.id = getIdGenerator();
-    }
+    private PayloadBuilder() {}
 
     @SneakyThrows
-    public String buildForTextSegmentation(String text) {
+    public static String buildForTextSegmentation(String text) {
         List<String> texts = Arrays.stream(text.split("\n+")).map(String::trim).toList();
 
         CommonJobParams commonJobParams = CommonJobParams.builder()
@@ -62,7 +59,7 @@ public class PayloadBuilder {
     }
 
     @SneakyThrows
-    public String buildForTranslation(List<Job> jobs, SourceTargetLangs langPair,
+    public static String buildForTranslation(List<Job> jobs, SourceTargetLangs langPair,
         List<String> batchText) {
         Preference preference = Preference.builder()
             .weight(new Weight())
@@ -102,14 +99,14 @@ public class PayloadBuilder {
         return modifyPayloadForDeepl(payload);
     }
 
-    private String modifyPayloadForDeepl(String payload) {
+    private static String modifyPayloadForDeepl(String payload) {
         String replacement = ((id.get() + 3) % 13 == 0 || (id.get() + 5) % 29 == 0) ? "method\" : " : "method\": ";
 
         return payload.replace("method\":", replacement);
     }
 
     @SneakyThrows
-    public List<String> buildForAllSentences(List<Sentence> allSentences,
+    public static List<String> buildForAllSentences(List<Sentence> allSentences,
         SourceTargetLangs langPair) {
         List<String> payloads = new ArrayList<>();
 
@@ -123,7 +120,7 @@ public class PayloadBuilder {
         return payloads;
     }
 
-    private List<List<Job>> buildJobsBatches(List<Sentence> allSentences) {
+    private static List<List<Job>> buildJobsBatches(List<Sentence> allSentences) {
         List<List<Job>> jobBatchesList = new ArrayList<>();
         List<Job> jobBatch = new ArrayList<>();
 
@@ -145,7 +142,7 @@ public class PayloadBuilder {
         return jobBatchesList;
     }
 
-    private Job createJobForSentence(int sentenceIndex, List<Sentence> allSentences) {
+    private static Job createJobForSentence(int sentenceIndex, List<Sentence> allSentences) {
         List<String> rawEnContextAfter = createContextAfter(sentenceIndex, allSentences);
         List<String> rawEnContextBefore = createContextBefore(sentenceIndex, allSentences);
 
@@ -158,7 +155,7 @@ public class PayloadBuilder {
             .build();
     }
 
-    private List<String> createContextAfter(int sentenceIndex, List<Sentence> allSentences) {
+    private static List<String> createContextAfter(int sentenceIndex, List<Sentence> allSentences) {
         List<String> rawEnContextAfter = new ArrayList<>();
 
         if (sentenceIndex != allSentences.size() - 1) {
@@ -168,7 +165,7 @@ public class PayloadBuilder {
         return rawEnContextAfter;
     }
 
-    private List<String> createContextBefore(int sentenceIndex, List<Sentence> allSentences) {
+    private static List<String> createContextBefore(int sentenceIndex, List<Sentence> allSentences) {
         List<String> rawEnContextBefore = new ArrayList<>();
         int j = sentenceIndex >= 5 ? sentenceIndex - 5 : 0;
 
@@ -180,14 +177,14 @@ public class PayloadBuilder {
     }
 
     @SneakyThrows
-    private int getBytesLength(List<Job> jobBatch, Job job) {
+    private static int getBytesLength(List<Job> jobBatch, Job job) {
         String batchStr = objectMapper.writeValueAsString(jobBatch);
         String jobStr = objectMapper.writeValueAsString(job);
 
         return (batchStr + jobStr).getBytes(StandardCharsets.UTF_8).length;
     }
 
-    private List<String> extractBatchText(List<Job> batch) {
+    private static List<String> extractBatchText(List<Job> batch) {
         return batch.stream()
             .flatMap(job -> job.getSentences().stream())
             .map(Sentence::getText)

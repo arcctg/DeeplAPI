@@ -1,9 +1,16 @@
 package org.arcctg.utils;
 
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
 import java.util.Random;
+import lombok.SneakyThrows;
 
 public class Utility {
+
+    private static final HttpClient client = HttpClient.newBuilder().build();
 
     private Utility(){}
 
@@ -33,5 +40,10 @@ public class Utility {
 
     private static long calculateValidTimestamp(long timestamp, int iCount) {
         return iCount != 0 ? timestamp + (iCount - (timestamp % iCount)) : timestamp;
+    }
+
+    @SneakyThrows
+    public static HttpResponse<String> sendRequest(HttpRequest request) {
+        return client.send(request, BodyHandlers.ofString());
     }
 }

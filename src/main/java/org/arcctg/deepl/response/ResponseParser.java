@@ -9,14 +9,12 @@ import org.arcctg.model.response.*;
 import org.arcctg.model.common.Sentence;
 
 public class ResponseParser {
-    private final ObjectMapper objectMapper;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ResponseParser() {
-        this.objectMapper = new ObjectMapper();
-    }
+    private ResponseParser() {}
 
     @SneakyThrows
-    public List<Sentence> parseTextSegmentation(String jsonResponse) {
+    public static List<Sentence> parseTextSegmentation(String jsonResponse) {
         checkForException(jsonResponse);
 
         ResponseTemplate response = objectMapper.readValue(jsonResponse, ResponseTemplate.class);
@@ -39,7 +37,7 @@ public class ResponseParser {
     }
 
     @SneakyThrows
-    public String parseTextTranslation(String jsonResponse) {
+    public static String parseTextTranslation(String jsonResponse) {
         checkForException(jsonResponse);
 
         ResponseTemplate response = objectMapper.readValue(jsonResponse, ResponseTemplate.class);
