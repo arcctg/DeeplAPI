@@ -17,8 +17,17 @@ public class TranslationCacheService implements TranslationService {
         this(DEFAULT_TRANSLATION_CACHE_SIZE);
     }
 
+    public TranslationCacheService(TranslationService translationService) {
+        this(DEFAULT_TRANSLATION_CACHE_SIZE, translationService);
+    }
+
     public TranslationCacheService(int translationCacheSize) {
-        this.translationService = new TranslationDefaultService();
+        this.translationService = new TranslationSyncService();
+        this.translationCache = new LRUCache<>(translationCacheSize);
+    }
+
+    public TranslationCacheService(int translationCacheSize, TranslationService translationService) {
+        this.translationService = translationService;
         this.translationCache = new LRUCache<>(translationCacheSize);
     }
 

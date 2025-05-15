@@ -1,14 +1,14 @@
 package org.arcctg.deepl.client;
 
 import org.arcctg.service.api.TranslationService;
-import org.arcctg.service.impl.TranslationDefaultService;
+import org.arcctg.service.impl.TranslationSyncService;
 import org.arcctg.deepl.model.SourceTargetLangs;
 
 public class DeeplClient {
     private final TranslationService translationService;
 
     public DeeplClient() {
-        this(new TranslationDefaultService());
+        this(new TranslationSyncService());
     }
 
     public DeeplClient(TranslationService translationService) {

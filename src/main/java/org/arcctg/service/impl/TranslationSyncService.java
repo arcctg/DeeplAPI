@@ -13,10 +13,10 @@ import org.arcctg.service.api.SegmentationService;
 import org.arcctg.service.api.TranslationService;
 import org.arcctg.deepl.model.dto.common.Sentence;
 
-public class TranslationDefaultService implements TranslationService {
+public class TranslationSyncService implements TranslationService {
     private final SegmentationService segmentationService;
 
-    public TranslationDefaultService() {
+    public TranslationSyncService() {
         this.segmentationService = new SegmentationServiceImpl();
     }
 
