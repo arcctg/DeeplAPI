@@ -3,7 +3,6 @@ package org.arcctg.service.impl;
 import static org.arcctg.deepl.builder.PayloadBuilder.buildForAllSentences;
 import static org.arcctg.deepl.builder.RequestBuilder.buildDefault;
 import static org.arcctg.deepl.parser.ResponseParser.parseTextTranslation;
-import static org.arcctg.util.Utility.sendRequest;
 
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -17,12 +16,20 @@ import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.service.api.SegmentationService;
 import org.arcctg.service.api.TranslationService;
 import org.arcctg.deepl.model.dto.common.Sentence;
+import org.arcctg.util.handler.api.RequestHandler;
+import org.arcctg.util.handler.impl.DefaultRequestHandler;
 
 public class TranslationAsyncService implements TranslationService {
     private final SegmentationService segmentationService;
+    private final RequestHandler requestHandler;
 
     public TranslationAsyncService() {
+        this(new DefaultRequestHandler());
+    }
+
+    public TranslationAsyncService(RequestHandler requestHandler) {
         this.segmentationService = new SegmentationServiceImpl();
+        this.requestHandler = requestHandler;
     }
 
     @Override
@@ -59,7 +66,7 @@ public class TranslationAsyncService implements TranslationService {
         return payloads.stream()
                 .map(payload -> (Supplier<String>) () -> {
                     HttpRequest request = buildDefault(payload);
-                    HttpResponse<String> response = sendRequest(request);
+                    HttpResponse<String> response = requestHandler.sendRequest(request);
 
                     return parseTextTranslation(response.body());
                 }).toList();
