@@ -18,16 +18,16 @@ public class DefaultSegmentationService implements SegmentationService {
 
     @Override
     public List<Sentence> process(String text) {
-        String jsonResponse = requestTextSegmentation(text);
+        HttpResponse<String> response = requestTextSegmentation(text);
 
-        return parseTextSegmentation(jsonResponse);
+        return parseTextSegmentation(response);
     }
 
-    private String requestTextSegmentation(String text) {
+    private HttpResponse<String> requestTextSegmentation(String text) {
         String payload = buildForTextSegmentation(text);
         HttpRequest request = buildDefault(payload);
         HttpResponse<String> response = requestHandler.sendRequest(request);
 
-        return response.body();
+        return response;
     }
 }

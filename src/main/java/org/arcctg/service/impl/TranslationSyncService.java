@@ -46,7 +46,7 @@ public class TranslationSyncService implements TranslationService {
         while (!requestQueue.isEmpty()) {
             HttpRequest request = requestQueue.poll();
             HttpResponse<String> response = requestHandler.sendRequest(request);
-            String translatedText = parseTextTranslation(response.body());
+            String translatedText = parseTextTranslation(response);
 
             result.append(translatedText);
         }
@@ -61,7 +61,6 @@ public class TranslationSyncService implements TranslationService {
 //
 //    return requests.stream()
 //            .map(requestHandler::sendRequest)
-//            .map(HttpResponse::body)
 //            .map(ResponseParser::parseTextTranslation)
 //            .collect(Collectors.joining());
 //}

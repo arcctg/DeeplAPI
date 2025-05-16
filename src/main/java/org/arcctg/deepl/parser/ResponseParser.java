@@ -1,6 +1,8 @@
 package org.arcctg.deepl.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +20,10 @@ public class ResponseParser {
     private ResponseParser() {}
 
     @SneakyThrows
-    public static List<Sentence> parseTextSegmentation(String jsonResponse) {
-        checkForException(jsonResponse);
+    public static List<Sentence> parseTextSegmentation(HttpResponse<String> httpResponse) {
+        checkForException(httpResponse);
 
-        ResponseTemplate response = objectMapper.readValue(jsonResponse, ResponseTemplate.class);
+        ResponseTemplate response = objectMapper.readValue(httpResponse.body(), ResponseTemplate.class);
 
         List<Sentence> sentences = new ArrayList<>();
         long idCounter = 1;
@@ -41,17 +43,18 @@ public class ResponseParser {
     }
 
     @SneakyThrows
-    public static String parseTextTranslation(String jsonResponse) {
-        checkForException(jsonResponse);
+    public static String parseTextTranslation(HttpResponse<String> httpResponse) {
+        checkForException(httpResponse);
 
-        ResponseTemplate response = objectMapper.readValue(jsonResponse, ResponseTemplate.class);
+        ResponseTemplate response = objectMapper.readValue(httpResponse.body(), ResponseTemplate.class);
 
         StringBuilder stringBuilder = new StringBuilder();
 
         for (Translation translation : response.getResult().getTranslations()) {
             for (Beam beam : translation.getBeams()) {
                 for (Sentence sentence : beam.getSentences()) {
-                    stringBuilder.append(" ").append(new String(sentence.getText().getBytes(), StandardCharsets.UTF_8));
+                    stringBuilder.append(" ").append(new String(sentence.getText().getBytes(),
+                            StandardCharsets.UTF_8));
                 }
             }
         }
@@ -59,9 +62,10 @@ public class ResponseParser {
         return stringBuilder.toString();
     }
 
-    private static void checkForException(String jsonResponse) {
-        if (jsonResponse.contains("Too many requests")) {
-            throw new RuntimeException("Too many requests");
+    private static void checkForException(HttpResponse<String> httpResponse) {
+        if (httpResponse.statusCode() != 200) {
+            throw new RuntimeException("Error: %d - %s".formatted(httpResponse.statusCode(),
+                    httpResponse.body()));
         }
     }
 }

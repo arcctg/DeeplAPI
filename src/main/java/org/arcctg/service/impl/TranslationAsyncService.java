@@ -70,7 +70,7 @@ public class TranslationAsyncService implements TranslationService {
     private List<Supplier<String>> buildTranslationTasks(Queue<HttpRequest> requestQueue) {
         return requestQueue.stream()
                 .map(request -> (Supplier<String>) () ->
-                        parseTextTranslation(requestHandler.sendRequest(request).body())
+                        parseTextTranslation(requestHandler.sendRequest(request))
                 ).toList();
     }
 }
