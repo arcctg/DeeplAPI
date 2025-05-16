@@ -18,7 +18,7 @@ public class TranslationCacheService implements TranslationService {
     }
 
     public TranslationCacheService(TranslationService translationService) {
-        this(DEFAULT_TRANSLATION_CACHE_SIZE, translationService);
+        this(translationService, DEFAULT_TRANSLATION_CACHE_SIZE);
     }
 
     public TranslationCacheService(int translationCacheSize) {
@@ -26,7 +26,7 @@ public class TranslationCacheService implements TranslationService {
         this.translationCache = new LRUCache<>(translationCacheSize);
     }
 
-    public TranslationCacheService(int translationCacheSize, TranslationService translationService) {
+    public TranslationCacheService(TranslationService translationService, int translationCacheSize) {
         this.translationService = translationService;
         this.translationCache = new LRUCache<>(translationCacheSize);
     }
