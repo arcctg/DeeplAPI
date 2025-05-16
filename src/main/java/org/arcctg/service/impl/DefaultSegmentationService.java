@@ -12,7 +12,7 @@ import org.arcctg.deepl.model.dto.common.Sentence;
 import org.arcctg.util.handler.api.RequestHandler;
 import org.arcctg.util.handler.impl.DefaultRequestHandler;
 
-public class SegmentationServiceImpl implements SegmentationService {
+public class DefaultSegmentationService implements SegmentationService {
 
     private final RequestHandler requestHandler = new DefaultRequestHandler();
 
