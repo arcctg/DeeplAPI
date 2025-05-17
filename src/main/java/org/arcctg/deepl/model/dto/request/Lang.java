@@ -7,10 +7,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+import java.util.function.Consumer;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
     "target_lang",
-    "preference",
+    "langPreference",
     "source_lang_computed",
     "lang_user_selected",
     "user_preferred_langs",
@@ -29,7 +31,7 @@ public class Lang {
     private String sourceLangComputed;
     @JsonProperty("lang_user_selected")
     private String langUserSelected;
-    @JsonProperty("preference")
+    @JsonProperty("langPreference")
     public Preference preference;
     @JsonProperty("user_preferred_langs")
     public String[] userPreferredLangs;
@@ -40,4 +42,14 @@ public class Lang {
     @JsonProperty("detectedLanguages")
     public DetectedLanguages detectedLanguages;
 
+
+    public static class LangBuilder {
+        public LangBuilder preference(Consumer<Preference.PreferenceBuilder> consumer) {
+            Preference.PreferenceBuilder builder = Preference.builder();
+            consumer.accept(builder);
+            this.preference = builder.build();
+
+            return this;
+        }
+    }
 }

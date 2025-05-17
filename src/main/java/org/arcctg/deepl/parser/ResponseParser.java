@@ -25,6 +25,10 @@ public class ResponseParser {
 
         ResponseTemplate response = objectMapper.readValue(httpResponse.body(), ResponseTemplate.class);
 
+        return getSentencesFromResponse(response);
+    }
+
+    private static List<Sentence> getSentencesFromResponse(ResponseTemplate response) {
         List<Sentence> sentences = new ArrayList<>();
         long idCounter = 1;
 
@@ -33,8 +37,6 @@ public class ResponseParser {
                 for (Sentence sentence : chunk.getSentences()) {
                     sentence.setId(idCounter++);
                     sentences.add(sentence);
-
-                    idCounter = idCounter >= 99 ? 1 : idCounter;
                 }
             }
         }
@@ -48,6 +50,10 @@ public class ResponseParser {
 
         ResponseTemplate response = objectMapper.readValue(httpResponse.body(), ResponseTemplate.class);
 
+        return getTranslatedString(response);
+    }
+
+    private static String getTranslatedString(ResponseTemplate response) {
         StringBuilder stringBuilder = new StringBuilder();
 
         for (Translation translation : response.getResult().getTranslations()) {

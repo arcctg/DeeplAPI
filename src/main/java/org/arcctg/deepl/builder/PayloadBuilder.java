@@ -10,12 +10,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.SneakyThrows;
-import org.arcctg.deepl.model.dto.request.CommonJobParams;
 import org.arcctg.deepl.model.dto.request.Job;
-import org.arcctg.deepl.model.dto.request.Lang;
-import org.arcctg.deepl.model.dto.request.Params;
 import org.arcctg.deepl.model.dto.request.PayloadTemplate;
-import org.arcctg.deepl.model.dto.request.Preference;
 import org.arcctg.deepl.model.dto.request.Weight;
 import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.deepl.model.dto.common.Sentence;
@@ -31,32 +27,24 @@ public class PayloadBuilder {
     public static String buildForTextSegmentation(String text) {
         List<String> texts = Arrays.stream(text.split("\n+")).map(String::trim).toList();
 
-        CommonJobParams commonJobParams = CommonJobParams.builder()
-            .mode("translate")
-            .textType("plaintext")
-            .build();
-
-        Preference preference = Preference.builder()
-            .weight(new Weight())
-            ._default("default")
-            .build();
-
-        Lang lang = Lang.builder()
-            .langUserSelected("EN")
-            .preference(preference)
-            .build();
-
-        Params params = Params.builder()
-            .texts(texts)
-            .commonJobParams(commonJobParams)
-            .lang(lang)
-            .build();
-
         PayloadTemplate payloadTemplate = PayloadTemplate.builder()
             .jsonrpc("2.0")
             .method("LMT_split_text")
-            .params(params)
             .id(id.next())
+            .params(paramsBuilder -> paramsBuilder
+                .texts(texts)
+                .lang(langBuilder -> langBuilder
+                    .langUserSelected("EN")
+                    .preference(preferenceBuilder -> preferenceBuilder
+                        .weight(new Weight())
+                        ._default("default")
+                    )
+                )
+                .commonJobParams(commonJobParamsBuilder -> commonJobParamsBuilder
+                    .mode("translate")
+                    .textType("plaintext")
+                )
+            )
             .build();
 
         String payload = objectMapper.writeValueAsString(payloadTemplate);
@@ -67,37 +55,30 @@ public class PayloadBuilder {
     @SneakyThrows
     public static String buildForTranslation(List<Job> jobs, SourceTargetLangs langPair,
         List<String> batchText) {
-        Preference preference = Preference.builder()
-            .weight(new Weight())
-            ._default("default")
-            .build();
-
-        Lang lang = Lang.builder()
-            .targetLang(langPair.getTargetLang())
-            .sourceLangComputed(langPair.getSourceLang())
-            .preference(preference)
-            .build();
-
-        CommonJobParams commonJobParams = CommonJobParams.builder()
-            .quality("normal")
-            .mode("translate")
-            .browserType(1)
-            .textType("plaintext")
-            .build();
-
-        Params params = Params.builder()
-            .jobs(jobs)
-            .lang(lang)
-            .commonJobParams(commonJobParams)
-            .priority(1)
-            .timestamp(generateTimestamp(batchText))
-            .build();
 
         PayloadTemplate payloadTemplate = PayloadTemplate.builder()
             .jsonrpc("2.0")
             .method("LMT_handle_jobs")
-            .params(params)
             .id(id.next())
+            .params(paramsBuilder -> paramsBuilder
+                .jobs(jobs)
+                .priority(1)
+                .timestamp(generateTimestamp(batchText))
+                .lang(langBuilder -> langBuilder
+                    .targetLang(langPair.getTargetLang())
+                    .sourceLangComputed(langPair.getSourceLang())
+                    .preference(preferenceBuilder -> preferenceBuilder
+                        .weight(new Weight())
+                        ._default("default")
+                    )
+                )
+                .commonJobParams(commonJobParamsBuilder -> commonJobParamsBuilder
+                    .quality("normal")
+                    .mode("translate")
+                    .browserType(1)
+                    .textType("plaintext")
+                )
+            )
             .build();
 
         String payload = objectMapper.writeValueAsString(payloadTemplate);
