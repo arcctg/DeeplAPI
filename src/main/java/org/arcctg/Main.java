@@ -7,8 +7,12 @@ import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.service.impl.*;
 import org.arcctg.util.handler.impl.DefaultRequestHandler;
 import org.arcctg.util.handler.impl.RetryRequestHandlerDecorator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Main {
+
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     @SneakyThrows
     public static void main(String[] args) {
@@ -33,10 +37,10 @@ public class Main {
         var langPair = new SourceTargetLangs(Language.ENGLISH, Language.UKRAINIAN);
         String text = "Hello world! How are you?";
 
-        System.out.println(client.translate(text, langPair) + "\n");
+        logger.info("{}\n", client.translate(text, langPair));
 
         translationService.unsubscribe(loggingObserver);
 
-        System.out.println(client.translate(text, langPair));
+        logger.info(client.translate(text, langPair));
     }
 }

@@ -11,8 +11,12 @@ import org.arcctg.service.dto.TranslationSuccessData;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TranslationObservableService implements TranslationService, Subject {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final TranslationService translationService;
     private final List<Observer> observers;
@@ -34,7 +38,7 @@ public class TranslationObservableService implements TranslationService, Subject
             return result;
         } catch (Exception e) {
             notify(new TranslationFailureData(text, langPair, e));
-            System.err.println("TranslationObservableService: Caught exception, Error: " + e.getMessage());
+            logger.warn("TranslationObservableService: Caught exception, Error: {}", e.getMessage());
 
             return "";
         }

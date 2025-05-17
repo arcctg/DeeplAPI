@@ -5,8 +5,13 @@ import org.arcctg.service.api.Observer;
 import org.arcctg.service.dto.TranslationAttemptData;
 import org.arcctg.service.dto.TranslationFailureData;
 import org.arcctg.service.dto.TranslationSuccessData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MetricsObserver implements Observer {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     private int successCount = 0;
     private int failureCount = 0;
     private int attemptCount = 0;
@@ -14,16 +19,16 @@ public class MetricsObserver implements Observer {
     @Override
     public void update(EventData eventData) {
         if (eventData instanceof TranslationAttemptData) {
-            System.out.println("[Metrics] New translation attempt. Total attempts: " + ++attemptCount);
+            logger.info("[Metrics] New translation attempt. Total attempts: {}", ++attemptCount);
         } else if (eventData instanceof TranslationSuccessData) {
-            System.out.println("[Metrics] Translation successful. Success count: " + ++successCount);
+            logger.info("[Metrics] Translation successful. Success count: {}", ++successCount);
         } else if (eventData instanceof TranslationFailureData) {
-            System.out.println("[Metrics] Translation failed. Failure count: " + ++failureCount);
+            logger.info("[Metrics] Translation failed. Failure count: {}", ++failureCount);
         }
     }
 
     public void printStats() {
-        System.out.printf("[Metrics] Final Stats - Attempts: %d, Successes: %d, Failures: %d%n",
-                attemptCount, successCount, failureCount);
+        logger.info("[Metrics] Final Stats - Attempts: {}, Successes: {}, Failures: {}",
+            attemptCount, successCount, failureCount);
     }
 }
