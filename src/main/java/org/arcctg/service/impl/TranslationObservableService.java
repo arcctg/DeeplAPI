@@ -12,11 +12,13 @@ import org.arcctg.service.dto.TranslationSuccessData;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TranslationObservableServiceDecorator extends BaseTranslationServiceDecorator implements Subject {
+public class TranslationObservableService implements TranslationService, Subject {
+
+    private final TranslationService translationService;
     private final List<Observer> observers;
 
-    public TranslationObservableServiceDecorator(TranslationService translationService) {
-        super(translationService);
+    public TranslationObservableService(TranslationService translationService) {
+        this.translationService = translationService;
         this.observers = new ArrayList<>();
     }
 
@@ -25,7 +27,7 @@ public class TranslationObservableServiceDecorator extends BaseTranslationServic
         notify(new TranslationAttemptData(text, langPair));
 
         try {
-            String result = super.process(text, langPair);
+            String result = translationService.process(text, langPair);
 
             notify(new TranslationSuccessData(text, langPair, result));
 

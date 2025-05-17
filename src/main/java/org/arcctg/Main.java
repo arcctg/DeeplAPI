@@ -12,8 +12,8 @@ public class Main {
 
     @SneakyThrows
     public static void main(String[] args) {
-        TranslationObservableServiceDecorator translationService =
-                new TranslationObservableServiceDecorator(
+        TranslationObservableService translationService =
+                new TranslationObservableService(
                         new TranslationCacheService(
                                 new TranslationSyncService(
                                         new RetryRequestHandlerDecorator(
