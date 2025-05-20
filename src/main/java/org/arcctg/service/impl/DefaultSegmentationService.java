@@ -1,20 +1,28 @@
 package org.arcctg.service.impl;
 
-import static org.arcctg.deepl.builder.PayloadBuilder.buildForTextSegmentation;
-import static org.arcctg.deepl.builder.RequestBuilder.buildDefault;
 import static org.arcctg.deepl.parser.ResponseParser.parseTextSegmentation;
 
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
-import org.arcctg.service.api.SegmentationService;
 import org.arcctg.deepl.model.dto.common.Sentence;
+import org.arcctg.service.api.PayloadBuilderService;
+import org.arcctg.service.api.RequestBuilderService;
+import org.arcctg.service.api.SegmentationService;
 import org.arcctg.util.handler.api.RequestHandler;
-import org.arcctg.util.handler.impl.DefaultRequestHandler;
 
 public class DefaultSegmentationService implements SegmentationService {
 
-    private final RequestHandler requestHandler = new DefaultRequestHandler();
+    private final RequestHandler requestHandler;
+    private final PayloadBuilderService payloadBuilderService;
+    private final RequestBuilderService requestBuilderService;
+
+    public DefaultSegmentationService(RequestHandler requestHandler,
+        PayloadBuilderService payloadBuilderService, RequestBuilderService requestBuilderService) {
+        this.requestHandler = requestHandler;
+        this.payloadBuilderService = payloadBuilderService;
+        this.requestBuilderService = requestBuilderService;
+    }
 
     @Override
     public List<Sentence> process(String text) {
@@ -24,10 +32,9 @@ public class DefaultSegmentationService implements SegmentationService {
     }
 
     private HttpResponse<String> requestTextSegmentation(String text) {
-        String payload = buildForTextSegmentation(text);
-        HttpRequest request = buildDefault(payload);
-        HttpResponse<String> response = requestHandler.sendRequest(request);
+        String payload = payloadBuilderService.buildForTextSegmentation(text);
+        HttpRequest request = requestBuilderService.buildDefault(payload);
 
-        return response;
+        return requestHandler.sendRequest(request);
     }
 }

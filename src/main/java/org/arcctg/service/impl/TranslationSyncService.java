@@ -1,34 +1,35 @@
 package org.arcctg.service.impl;
 
-import static org.arcctg.deepl.builder.PayloadBuilder.buildForAllSentences;
 import static org.arcctg.deepl.parser.ResponseParser.parseTextTranslation;
 
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Queue;
-
 import org.arcctg.deepl.model.SourceTargetLangs;
+import org.arcctg.deepl.model.dto.common.Sentence;
+import org.arcctg.service.api.PayloadBuilderService;
 import org.arcctg.service.api.QueueRequestService;
 import org.arcctg.service.api.SegmentationService;
 import org.arcctg.service.api.TranslationService;
-import org.arcctg.deepl.model.dto.common.Sentence;
 import org.arcctg.util.handler.api.RequestHandler;
-import org.arcctg.util.handler.impl.DefaultRequestHandler;
 
 public class TranslationSyncService implements TranslationService {
+
+    private final RequestHandler requestHandler;
     private final SegmentationService segmentationService;
     private final QueueRequestService queueRequestService;
-    private final RequestHandler requestHandler;
+    private final PayloadBuilderService payloadBuilderService;
 
-    public TranslationSyncService() {
-        this(new DefaultRequestHandler());
-    }
-
-    public TranslationSyncService(RequestHandler requestHandler) {
-        this.segmentationService = new DefaultSegmentationService();
-        this.queueRequestService = new AsyncQueueRequestService();
+    public TranslationSyncService(
+        RequestHandler requestHandler,
+        SegmentationService segmentationService,
+        QueueRequestService queueRequestService,
+        PayloadBuilderService payloadBuilderService) {
         this.requestHandler = requestHandler;
+        this.segmentationService = segmentationService;
+        this.queueRequestService = queueRequestService;
+        this.payloadBuilderService = payloadBuilderService;
     }
 
     @Override
@@ -40,7 +41,7 @@ public class TranslationSyncService implements TranslationService {
 
     private String translateSentences(List<Sentence> sentences, SourceTargetLangs langPair) {
         StringBuilder result = new StringBuilder();
-        List<String> payloads = buildForAllSentences(sentences, langPair);
+        List<String> payloads = payloadBuilderService.buildForAllSentences(sentences, langPair);
         Queue<HttpRequest> requestQueue = queueRequestService.process(payloads);
 
         while (!requestQueue.isEmpty()) {
@@ -54,13 +55,3 @@ public class TranslationSyncService implements TranslationService {
         return result.toString().trim();
     }
 }
-
-//private String translateSentences(List<Sentence> sentences, SourceTargetLangs langPair) {
-//    List<String> payloads = buildForAllSentences(sentences, langPair);
-//    Queue<HttpRequest> requests = queueRequestService.process(payloads);
-//
-//    return requests.stream()
-//            .map(requestHandler::sendRequest)
-//            .map(ResponseParser::parseTextTranslation)
-//            .collect(Collectors.joining());
-//}

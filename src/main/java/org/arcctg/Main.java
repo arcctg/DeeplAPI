@@ -4,7 +4,15 @@ import lombok.SneakyThrows;
 import org.arcctg.deepl.client.DeeplClient;
 import org.arcctg.deepl.model.Language;
 import org.arcctg.deepl.model.SourceTargetLangs;
-import org.arcctg.service.impl.*;
+import org.arcctg.service.impl.AsyncQueueRequestService;
+import org.arcctg.service.impl.DefaultPayloadBuilderService;
+import org.arcctg.service.impl.DefaultRequestBuilderService;
+import org.arcctg.service.impl.DefaultSegmentationService;
+import org.arcctg.service.impl.LoggingObserver;
+import org.arcctg.service.impl.MetricsObserver;
+import org.arcctg.service.impl.TranslationCacheService;
+import org.arcctg.service.impl.TranslationObservableService;
+import org.arcctg.service.impl.TranslationSyncService;
 import org.arcctg.util.handler.impl.DefaultRequestHandler;
 import org.arcctg.util.handler.impl.RetryRequestHandlerDecorator;
 import org.slf4j.Logger;
@@ -17,15 +25,22 @@ public class Main {
     @SneakyThrows
     public static void main(String[] args) {
         TranslationObservableService translationService =
-                new TranslationObservableService(
-                        new TranslationCacheService(
-                                new TranslationSyncService(
-                                        new RetryRequestHandlerDecorator(
-                                                new DefaultRequestHandler(), 2, 10_000
-                                        )
-                                )
-                        )
-                );
+            new TranslationObservableService(
+                new TranslationCacheService(
+                    new TranslationSyncService(
+                        new RetryRequestHandlerDecorator(
+                            new DefaultRequestHandler(), 2, 10_000
+                        ),
+                        new DefaultSegmentationService(
+                            new DefaultRequestHandler(),
+                            new DefaultPayloadBuilderService(),
+                            new DefaultRequestBuilderService()
+                        ),
+                        new AsyncQueueRequestService(new DefaultRequestBuilderService()),
+                        new DefaultPayloadBuilderService()
+                    )
+                )
+            );
 
         LoggingObserver loggingObserver = new LoggingObserver("Main");
         MetricsObserver metricsObserver = new MetricsObserver();
