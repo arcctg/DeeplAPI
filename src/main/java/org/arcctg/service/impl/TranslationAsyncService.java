@@ -1,7 +1,5 @@
 package org.arcctg.service.impl;
 
-import static org.arcctg.deepl.parser.ResponseParser.parseTextTranslation;
-
 import java.net.http.HttpRequest;
 import java.util.List;
 import java.util.Queue;
@@ -13,6 +11,7 @@ import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.deepl.model.dto.common.Sentence;
 import org.arcctg.service.api.PayloadBuilderService;
 import org.arcctg.service.api.QueueRequestService;
+import org.arcctg.service.api.ResponseParserService;
 import org.arcctg.service.api.SegmentationService;
 import org.arcctg.service.api.TranslationService;
 import org.arcctg.util.handler.api.RequestHandler;
@@ -23,16 +22,19 @@ public class TranslationAsyncService implements TranslationService {
     private final SegmentationService segmentationService;
     private final QueueRequestService queueRequestService;
     private final PayloadBuilderService payloadBuilderService;
+    private final ResponseParserService responseParser;
 
     public TranslationAsyncService(
         RequestHandler requestHandler,
         SegmentationService segmentationService,
         QueueRequestService queueRequestService,
-        PayloadBuilderService payloadBuilderService) {
+        PayloadBuilderService payloadBuilderService,
+        ResponseParserService responseParser) {
         this.requestHandler = requestHandler;
         this.segmentationService = segmentationService;
         this.queueRequestService = queueRequestService;
         this.payloadBuilderService = payloadBuilderService;
+        this.responseParser = responseParser;
     }
 
     @Override
@@ -69,7 +71,7 @@ public class TranslationAsyncService implements TranslationService {
     private List<Supplier<String>> buildTranslationTasks(Queue<HttpRequest> requestQueue) {
         return requestQueue.stream()
             .map(request -> (Supplier<String>) () ->
-                parseTextTranslation(requestHandler.sendRequest(request))
+                responseParser.parseTextTranslation(requestHandler.sendRequest(request))
             ).toList();
     }
 }

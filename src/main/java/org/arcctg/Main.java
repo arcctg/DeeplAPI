@@ -1,5 +1,6 @@
 package org.arcctg;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.arcctg.deepl.client.DeeplClient;
 import org.arcctg.deepl.model.Language;
@@ -7,6 +8,7 @@ import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.service.impl.AsyncQueueRequestService;
 import org.arcctg.service.impl.DefaultPayloadBuilderService;
 import org.arcctg.service.impl.DefaultRequestBuilderService;
+import org.arcctg.service.impl.DefaultResponseParserService;
 import org.arcctg.service.impl.DefaultSegmentationService;
 import org.arcctg.service.impl.LoggingObserver;
 import org.arcctg.service.impl.MetricsObserver;
@@ -34,10 +36,12 @@ public class Main {
                         new DefaultSegmentationService(
                             new DefaultRequestHandler(),
                             new DefaultPayloadBuilderService(),
-                            new DefaultRequestBuilderService()
+                            new DefaultRequestBuilderService(),
+                            new DefaultResponseParserService(new ObjectMapper())
                         ),
                         new AsyncQueueRequestService(new DefaultRequestBuilderService()),
-                        new DefaultPayloadBuilderService()
+                        new DefaultPayloadBuilderService(),
+                        new DefaultResponseParserService(new ObjectMapper())
                     )
                 )
             );
