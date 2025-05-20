@@ -2,13 +2,13 @@ package org.arcctg.service.impl;
 
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import org.arcctg.service.api.RequestHandler;
+import org.arcctg.service.api.RequestHandlerService;
 
-public abstract class BaseRequestHandlerDecorator implements RequestHandler {
+public abstract class BaseRequestHandlerDecorator implements RequestHandlerService {
 
-    private final RequestHandler requestHandler;
+    private final RequestHandlerService requestHandler;
 
-    BaseRequestHandlerDecorator(RequestHandler requestHandler) {
+    BaseRequestHandlerDecorator(RequestHandlerService requestHandler) {
         this.requestHandler = requestHandler;
     }
 

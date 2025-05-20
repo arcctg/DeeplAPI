@@ -3,7 +3,7 @@ package org.arcctg.service.impl;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import lombok.SneakyThrows;
-import org.arcctg.service.api.RequestHandler;
+import org.arcctg.service.api.RequestHandlerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class RetryRequestHandlerDecorator extends BaseRequestHandlerDecorator {
         this(new DefaultRequestHandler(), maxRetries, retryDelayMs);
     }
 
-    public RetryRequestHandlerDecorator(RequestHandler requestHandler, int maxRetries,
+    public RetryRequestHandlerDecorator(RequestHandlerService requestHandler, int maxRetries,
         long retryDelayMs) {
         super(requestHandler);
         this.maxRetries = maxRetries;

@@ -6,19 +6,19 @@ import java.util.List;
 import org.arcctg.deepl.model.dto.common.Sentence;
 import org.arcctg.service.api.PayloadBuilderService;
 import org.arcctg.service.api.RequestBuilderService;
-import org.arcctg.service.api.RequestHandler;
+import org.arcctg.service.api.RequestHandlerService;
 import org.arcctg.service.api.ResponseParserService;
 import org.arcctg.service.api.SegmentationService;
 
 public class DefaultSegmentationService implements SegmentationService {
 
-    private final RequestHandler requestHandler;
+    private final RequestHandlerService requestHandler;
     private final PayloadBuilderService payloadBuilderService;
     private final RequestBuilderService requestBuilderService;
     private final ResponseParserService responseParser;
 
     public DefaultSegmentationService(
-        RequestHandler requestHandler,
+        RequestHandlerService requestHandler,
         PayloadBuilderService payloadBuilderService,
         RequestBuilderService requestBuilderService,
         ResponseParserService responseParser) {

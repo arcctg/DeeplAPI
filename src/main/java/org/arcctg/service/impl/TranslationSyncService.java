@@ -8,21 +8,21 @@ import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.deepl.model.dto.common.Sentence;
 import org.arcctg.service.api.PayloadBuilderService;
 import org.arcctg.service.api.QueueRequestService;
-import org.arcctg.service.api.RequestHandler;
+import org.arcctg.service.api.RequestHandlerService;
 import org.arcctg.service.api.ResponseParserService;
 import org.arcctg.service.api.SegmentationService;
 import org.arcctg.service.api.TranslationService;
 
 public class TranslationSyncService implements TranslationService {
 
-    private final RequestHandler requestHandler;
+    private final RequestHandlerService requestHandler;
     private final SegmentationService segmentationService;
     private final QueueRequestService queueRequestService;
     private final PayloadBuilderService payloadBuilderService;
     private final ResponseParserService responseParser;
 
     public TranslationSyncService(
-        RequestHandler requestHandler,
+        RequestHandlerService requestHandler,
         SegmentationService segmentationService,
         QueueRequestService queueRequestService,
         PayloadBuilderService payloadBuilderService,
