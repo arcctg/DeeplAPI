@@ -1,17 +1,18 @@
-package org.arcctg.deepl.builder;
+package org.arcctg.service.impl;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import lombok.SneakyThrows;
+import org.arcctg.service.api.RequestBuilderService;
 
-public class RequestBuilder {
+public class DefaultRequestBuilderService implements RequestBuilderService {
+
     private static final String API_URL = "https://www2.deepl.com/jsonrpc";
 
-    private RequestBuilder() {}
-
+    @Override
     @SneakyThrows
-    public static HttpRequest buildDefault(String payload) {
+    public HttpRequest buildDefault(String payload) {
         return HttpRequest.newBuilder()
             .uri(new URI(API_URL))
             .header("accept", "*/*")

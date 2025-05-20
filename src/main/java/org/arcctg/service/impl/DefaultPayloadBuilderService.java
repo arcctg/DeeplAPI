@@ -1,7 +1,7 @@
-package org.arcctg.deepl.builder;
+package org.arcctg.service.impl;
 
-import static org.arcctg.util.Utility.getIdGenerator;
 import static org.arcctg.util.Utility.generateTimestamp;
+import static org.arcctg.util.Utility.getIdGenerator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
@@ -10,21 +10,21 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import lombok.SneakyThrows;
+import org.arcctg.deepl.model.SourceTargetLangs;
+import org.arcctg.deepl.model.dto.common.Sentence;
 import org.arcctg.deepl.model.dto.request.Job;
 import org.arcctg.deepl.model.dto.request.PayloadTemplate;
 import org.arcctg.deepl.model.dto.request.Weight;
-import org.arcctg.deepl.model.SourceTargetLangs;
-import org.arcctg.deepl.model.dto.common.Sentence;
+import org.arcctg.service.api.PayloadBuilderService;
 import org.arcctg.util.IdGenerator;
 
-public class PayloadBuilder {
+public class DefaultPayloadBuilderService implements PayloadBuilderService {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final IdGenerator id = getIdGenerator();
 
-    private PayloadBuilder() {}
-
+    @Override
     @SneakyThrows
-    public static String buildForTextSegmentation(String text) {
+    public String buildForTextSegmentation(String text) {
         List<String> texts = Arrays.stream(text.split("\n+")).map(String::trim).toList();
 
         PayloadTemplate payloadTemplate = PayloadTemplate.builder()
@@ -50,6 +50,22 @@ public class PayloadBuilder {
         String payload = objectMapper.writeValueAsString(payloadTemplate);
 
         return modifyPayloadForDeepl(payload);
+    }
+
+    @Override
+    @SneakyThrows
+    public List<String> buildForAllSentences(List<Sentence> allSentences,
+        SourceTargetLangs langPair) {
+        List<String> payloads = new ArrayList<>();
+
+        for (List<Job> batch : buildJobsBatches(allSentences)) {
+            List<String> batchText = extractBatchText(batch);
+            String payload = buildForTranslation(batch, langPair, batchText);
+
+            payloads.add(payload);
+        }
+
+        return payloads;
     }
 
     @SneakyThrows
@@ -90,21 +106,6 @@ public class PayloadBuilder {
         String replacement = ((id.get() + 3) % 13 == 0 || (id.get() + 5) % 29 == 0) ? "method\" : " : "method\": ";
 
         return payload.replace("method\":", replacement);
-    }
-
-    @SneakyThrows
-    public static List<String> buildForAllSentences(List<Sentence> allSentences,
-        SourceTargetLangs langPair) {
-        List<String> payloads = new ArrayList<>();
-
-        for (List<Job> batch : buildJobsBatches(allSentences)) {
-            List<String> batchText = extractBatchText(batch);
-            String payload = buildForTranslation(batch, langPair, batchText);
-
-            payloads.add(payload);
-        }
-
-        return payloads;
     }
 
     private static List<List<Job>> buildJobsBatches(List<Sentence> allSentences) {
