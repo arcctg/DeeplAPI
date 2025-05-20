@@ -8,15 +8,15 @@ import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.service.impl.AsyncQueueRequestService;
 import org.arcctg.service.impl.DefaultPayloadBuilderService;
 import org.arcctg.service.impl.DefaultRequestBuilderService;
+import org.arcctg.service.impl.DefaultRequestHandler;
 import org.arcctg.service.impl.DefaultResponseParserService;
 import org.arcctg.service.impl.DefaultSegmentationService;
 import org.arcctg.service.impl.LoggingObserver;
 import org.arcctg.service.impl.MetricsObserver;
+import org.arcctg.service.impl.RetryRequestHandlerDecorator;
 import org.arcctg.service.impl.TranslationCacheService;
 import org.arcctg.service.impl.TranslationObservableService;
 import org.arcctg.service.impl.TranslationSyncService;
-import org.arcctg.util.handler.impl.DefaultRequestHandler;
-import org.arcctg.util.handler.impl.RetryRequestHandlerDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

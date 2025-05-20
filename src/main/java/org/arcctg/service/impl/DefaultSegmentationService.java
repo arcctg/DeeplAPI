@@ -6,9 +6,9 @@ import java.util.List;
 import org.arcctg.deepl.model.dto.common.Sentence;
 import org.arcctg.service.api.PayloadBuilderService;
 import org.arcctg.service.api.RequestBuilderService;
+import org.arcctg.service.api.RequestHandler;
 import org.arcctg.service.api.ResponseParserService;
 import org.arcctg.service.api.SegmentationService;
-import org.arcctg.util.handler.api.RequestHandler;
 
 public class DefaultSegmentationService implements SegmentationService {
 

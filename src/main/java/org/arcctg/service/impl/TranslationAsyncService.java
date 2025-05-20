@@ -11,10 +11,10 @@ import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.deepl.model.dto.common.Sentence;
 import org.arcctg.service.api.PayloadBuilderService;
 import org.arcctg.service.api.QueueRequestService;
+import org.arcctg.service.api.RequestHandler;
 import org.arcctg.service.api.ResponseParserService;
 import org.arcctg.service.api.SegmentationService;
 import org.arcctg.service.api.TranslationService;
-import org.arcctg.util.handler.api.RequestHandler;
 
 public class TranslationAsyncService implements TranslationService {
 

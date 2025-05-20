@@ -1,11 +1,10 @@
-package org.arcctg.util.handler.impl;
-
-import lombok.SneakyThrows;
-import org.arcctg.util.handler.api.RequestHandler;
+package org.arcctg.service.impl;
 
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import lombok.SneakyThrows;
+import org.arcctg.service.api.RequestHandler;
 
 public class DefaultRequestHandler implements RequestHandler {
 

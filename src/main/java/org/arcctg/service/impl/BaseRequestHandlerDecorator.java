@@ -1,9 +1,8 @@
-package org.arcctg.util.handler.impl;
-
-import org.arcctg.util.handler.api.RequestHandler;
+package org.arcctg.service.impl;
 
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import org.arcctg.service.api.RequestHandler;
 
 public abstract class BaseRequestHandlerDecorator implements RequestHandler {
 
