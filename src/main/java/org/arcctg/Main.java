@@ -1,22 +1,21 @@
 package org.arcctg;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import lombok.SneakyThrows;
+import org.arcctg.config.DeeplModule;
 import org.arcctg.deepl.client.DeeplClient;
 import org.arcctg.deepl.model.Language;
 import org.arcctg.deepl.model.SourceTargetLangs;
-import org.arcctg.service.impl.AsyncQueueRequestService;
-import org.arcctg.service.impl.DefaultPayloadBuilderService;
-import org.arcctg.service.impl.DefaultRequestBuilderService;
+import org.arcctg.service.api.RequestHandlerService;
+import org.arcctg.service.api.TranslationService;
+import org.arcctg.service.api.TranslationSyncServiceFactory;
 import org.arcctg.service.impl.DefaultRequestHandler;
-import org.arcctg.service.impl.DefaultResponseParserService;
-import org.arcctg.service.impl.DefaultSegmentationService;
 import org.arcctg.service.impl.LoggingObserver;
 import org.arcctg.service.impl.MetricsObserver;
 import org.arcctg.service.impl.RetryRequestHandlerDecorator;
 import org.arcctg.service.impl.TranslationCacheService;
 import org.arcctg.service.impl.TranslationObservableService;
-import org.arcctg.service.impl.TranslationSyncService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,25 +25,19 @@ public class Main {
 
     @SneakyThrows
     public static void main(String[] args) {
-        TranslationObservableService translationService =
-            new TranslationObservableService(
-                new TranslationCacheService(
-                    new TranslationSyncService(
-                        new RetryRequestHandlerDecorator(
-                            new DefaultRequestHandler(), 2, 10_000
-                        ),
-                        new DefaultSegmentationService(
-                            new DefaultRequestHandler(),
-                            new DefaultPayloadBuilderService(),
-                            new DefaultRequestBuilderService(),
-                            new DefaultResponseParserService(new ObjectMapper())
-                        ),
-                        new AsyncQueueRequestService(new DefaultRequestBuilderService()),
-                        new DefaultPayloadBuilderService(),
-                        new DefaultResponseParserService(new ObjectMapper())
-                    )
-                )
-            );
+        Injector injector = Guice.createInjector(new DeeplModule());
+
+        RequestHandlerService requestHandler = new RetryRequestHandlerDecorator(
+            new DefaultRequestHandler(), 2, 10_000
+        );
+
+        TranslationSyncServiceFactory factory = injector.getInstance(
+            TranslationSyncServiceFactory.class);
+        TranslationService syncService = factory.create(requestHandler);
+
+        TranslationObservableService translationService = new TranslationObservableService(
+            new TranslationCacheService(syncService, 100)
+        );
 
         LoggingObserver loggingObserver = new LoggingObserver("Main");
         MetricsObserver metricsObserver = new MetricsObserver();

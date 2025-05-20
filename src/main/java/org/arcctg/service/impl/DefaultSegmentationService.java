@@ -1,5 +1,6 @@
 package org.arcctg.service.impl;
 
+import com.google.inject.Inject;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
@@ -17,6 +18,7 @@ public class DefaultSegmentationService implements SegmentationService {
     private final RequestBuilderService requestBuilderService;
     private final ResponseParserService responseParser;
 
+    @Inject
     public DefaultSegmentationService(
         RequestHandlerService requestHandler,
         PayloadBuilderService payloadBuilderService,

@@ -1,5 +1,6 @@
 package org.arcctg.service.impl;
 
+import com.google.inject.Inject;
 import java.net.http.HttpRequest;
 import java.util.List;
 import java.util.Queue;
@@ -12,6 +13,7 @@ public class AsyncQueueRequestService implements QueueRequestService {
 
     private final RequestBuilderService requestBuilderService;
 
+    @Inject
     public AsyncQueueRequestService(RequestBuilderService requestBuilderService) {
         this.requestBuilderService = requestBuilderService;
     }

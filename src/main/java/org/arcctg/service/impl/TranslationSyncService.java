@@ -1,5 +1,7 @@
 package org.arcctg.service.impl;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
@@ -21,8 +23,9 @@ public class TranslationSyncService implements TranslationService {
     private final PayloadBuilderService payloadBuilderService;
     private final ResponseParserService responseParser;
 
+    @Inject
     public TranslationSyncService(
-        RequestHandlerService requestHandler,
+        @Assisted RequestHandlerService requestHandler,
         SegmentationService segmentationService,
         QueueRequestService queueRequestService,
         PayloadBuilderService payloadBuilderService,

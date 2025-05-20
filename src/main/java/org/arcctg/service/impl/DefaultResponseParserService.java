@@ -1,6 +1,7 @@
 package org.arcctg.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class DefaultResponseParserService implements ResponseParserService {
 
     private final ObjectMapper objectMapper;
 
+    @Inject
     public DefaultResponseParserService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
