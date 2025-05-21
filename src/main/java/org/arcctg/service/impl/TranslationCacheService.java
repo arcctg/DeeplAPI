@@ -1,16 +1,14 @@
 package org.arcctg.service.impl;
 
-import org.arcctg.cache.spi.Cache;
+import lombok.extern.slf4j.Slf4j;
 import org.arcctg.cache.impl.LRUCache;
 import org.arcctg.cache.model.TranslationCacheKey;
+import org.arcctg.cache.spi.Cache;
 import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.service.api.TranslationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class TranslationCacheService implements TranslationService {
-
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final TranslationService translationService;
     private final Cache<TranslationCacheKey, String> translationCache;
@@ -32,7 +30,7 @@ public class TranslationCacheService implements TranslationService {
         String translation = getCachedTranslation(text, langPair);
 
         if (translation != null) {
-            logger.info("Using cached translation for text: {}", text);
+            log.info("Using cached translation for text: {}", text);
         } else {
             translation = translationService.process(text, langPair);
             cacheTranslation(text, langPair, translation);

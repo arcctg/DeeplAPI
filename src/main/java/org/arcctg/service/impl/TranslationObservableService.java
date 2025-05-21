@@ -1,5 +1,8 @@
 package org.arcctg.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.service.api.EventData;
 import org.arcctg.service.api.Observer;
@@ -9,14 +12,8 @@ import org.arcctg.service.dto.TranslationAttemptData;
 import org.arcctg.service.dto.TranslationFailureData;
 import org.arcctg.service.dto.TranslationSuccessData;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+@Slf4j
 public class TranslationObservableService implements TranslationService, Subject {
-
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final TranslationService translationService;
     private final List<Observer> observers;
@@ -38,7 +35,7 @@ public class TranslationObservableService implements TranslationService, Subject
             return result;
         } catch (Exception e) {
             notify(new TranslationFailureData(text, langPair, e));
-            logger.warn("TranslationObservableService: Caught exception, Error: {}", e.getMessage());
+            log.warn("TranslationObservableService: Caught exception, Error: {}", e.getMessage());
 
             return "";
         }

@@ -3,13 +3,11 @@ package org.arcctg.service.impl;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.arcctg.service.api.RequestHandlerService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class RetryRequestHandlerDecorator extends BaseRequestHandlerDecorator {
-
-    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private static final int DEFAULT_MAX_RETRIES = 1;
     private static final long DEFAULT_RETRY_DELAY_MS = 1000;
@@ -47,7 +45,7 @@ public class RetryRequestHandlerDecorator extends BaseRequestHandlerDecorator {
                 if (attempts > maxRetries) {
                     throw new RuntimeException("Failed after " + maxRetries + " retry attempts", e);
                 }
-                logger.warn("Attempt {} failed, retrying in {} ms", attempts, retryDelayMs, e);
+                log.warn("Attempt {} failed, retrying in {} ms", attempts, retryDelayMs, e);
                 Thread.sleep(retryDelayMs);
             }
         }
