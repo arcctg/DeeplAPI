@@ -14,12 +14,8 @@ public class RetryRequestHandlerDecorator extends BaseRequestHandlerDecorator {
     private final int maxRetries;
     private final long retryDelayMs;
 
-    public RetryRequestHandlerDecorator() {
-        this(new DefaultRequestHandler(), DEFAULT_MAX_RETRIES, DEFAULT_RETRY_DELAY_MS);
-    }
-
-    public RetryRequestHandlerDecorator(int maxRetries, long retryDelayMs) {
-        this(new DefaultRequestHandler(), maxRetries, retryDelayMs);
+    public RetryRequestHandlerDecorator(RequestHandlerService requestHandler) {
+        this(requestHandler, DEFAULT_MAX_RETRIES, DEFAULT_RETRY_DELAY_MS);
     }
 
     public RetryRequestHandlerDecorator(RequestHandlerService requestHandler, int maxRetries,
@@ -29,27 +25,45 @@ public class RetryRequestHandlerDecorator extends BaseRequestHandlerDecorator {
         this.retryDelayMs = retryDelayMs;
     }
 
-    @SneakyThrows
     @Override
     public HttpResponse<String> sendRequest(HttpRequest request) {
+        Exception lastException = null;
+
         for (int attempts = 1; attempts <= maxRetries + 1; attempts++) {
             try {
                 HttpResponse<String> response = super.sendRequest(request);
-                if (response.statusCode() == 200) {
+
+                if (isSuccessResponse(response)) {
                     return response;
                 }
 
-                throw new RuntimeException(
-                    "Error %d: %s".formatted(response.statusCode(), response.body()));
+                lastException = createHttpErrorException(response);
             } catch (Exception e) {
-                if (attempts > maxRetries) {
-                    throw new RuntimeException("Failed after " + maxRetries + " retry attempts", e);
-                }
-                log.warn("Attempt {} failed, retrying in {} ms", attempts, retryDelayMs, e);
-                Thread.sleep(retryDelayMs);
+                lastException = e;
             }
+
+            if (attempts > maxRetries) {
+                break;
+            }
+
+            waitBeforeRetry(attempts);
         }
 
-        throw new RuntimeException("Unexpected error");
+        throw new RuntimeException("Failed after " + maxRetries + " retry attempts", lastException);
+    }
+
+    private boolean isSuccessResponse(HttpResponse<String> response) {
+        return response.statusCode() >= 200 && response.statusCode() < 300;
+    }
+
+    private RuntimeException createHttpErrorException(HttpResponse<String> response) {
+        return new RuntimeException(
+            "HTTP Error %d: %s".formatted(response.statusCode(), response.body()));
+    }
+
+    @SneakyThrows
+    private void waitBeforeRetry(int attemptNumber) {
+        log.warn("Attempt {} failed, retrying in {} ms", attemptNumber, retryDelayMs);
+        Thread.sleep(retryDelayMs);
     }
 }
