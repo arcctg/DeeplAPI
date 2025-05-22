@@ -2,6 +2,7 @@ package org.arcctg.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.service.api.EventData;
@@ -13,15 +14,11 @@ import org.arcctg.service.dto.TranslationFailureData;
 import org.arcctg.service.dto.TranslationSuccessData;
 
 @Slf4j
+@RequiredArgsConstructor
 public class TranslationObservableService implements TranslationService, Subject {
 
     private final TranslationService translationService;
-    private final List<Observer> observers;
-
-    public TranslationObservableService(TranslationService translationService) {
-        this.translationService = translationService;
-        this.observers = new ArrayList<>();
-    }
+    private final List<Observer> observers = new ArrayList<>();
 
     @Override
     public String process(String text, SourceTargetLangs langPair) {

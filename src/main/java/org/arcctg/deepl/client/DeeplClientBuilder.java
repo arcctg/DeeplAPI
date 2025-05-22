@@ -15,36 +15,49 @@ import org.arcctg.service.impl.TranslationObservableService;
 
 public class DeeplClientBuilder {
 
-    private RequestHandlerService requestHandler = new DefaultRequestHandler();
     private List<Observer> observers;
+    private Injector injector;
+
+    private boolean enableRetryHandler;
     private boolean enableAsyncRequests;
+
+    private int maxRetries;
+    private int delayMs;
     private int cacheSize;
 
     public DeeplClientBuilder withRetryHandler(int maxRetries, int delayMs) {
-        this.requestHandler = new RetryRequestHandlerDecorator(
-            new DefaultRequestHandler(), maxRetries, delayMs
-        );
+        this.enableRetryHandler = true;
+        this.maxRetries = maxRetries;
+        this.delayMs = delayMs;
+
         return this;
     }
 
     public DeeplClientBuilder withAsyncRequests(boolean enable) {
         this.enableAsyncRequests = enable;
+
         return this;
     }
 
     public DeeplClientBuilder withCacheSize(int size) {
         this.cacheSize = size;
+
         return this;
     }
 
     public DeeplClientBuilder withObservers(List<Observer> observers) {
         this.observers = observers;
+
         return this;
     }
 
     public DeeplClient build() {
+        injector = Guice.createInjector(new DeeplModule());
+
         TranslationServiceFactory factory = createServiceFactory();
-        TranslationService translationService = createBaseTranslationService(factory);
+        RequestHandlerService requestHandler = createRequestHandler();
+        TranslationService translationService = createBaseTranslationService(factory,
+            requestHandler);
 
         translationService = applyCacheIfEnabled(translationService);
         translationService = applyObserversIfEnabled(translationService);
@@ -52,13 +65,20 @@ public class DeeplClientBuilder {
         return new DeeplClient(translationService);
     }
 
-    private TranslationServiceFactory createServiceFactory() {
-        Injector injector = Guice.createInjector(new DeeplModule());
+    private RequestHandlerService createRequestHandler() {
+        RequestHandlerService handlerService = injector.getInstance(DefaultRequestHandler.class);
 
+        return enableRetryHandler
+            ? new RetryRequestHandlerDecorator(handlerService, maxRetries, delayMs)
+            : handlerService;
+    }
+
+    private TranslationServiceFactory createServiceFactory() {
         return injector.getInstance(TranslationServiceFactory.class);
     }
 
-    private TranslationService createBaseTranslationService(TranslationServiceFactory factory) {
+    private TranslationService createBaseTranslationService(TranslationServiceFactory factory,
+        RequestHandlerService requestHandler) {
         return enableAsyncRequests
             ? factory.createAsync(requestHandler)
             : factory.createSync(requestHandler);

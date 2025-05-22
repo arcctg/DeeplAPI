@@ -7,6 +7,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.arcctg.deepl.model.dto.common.Sentence;
 import org.arcctg.deepl.model.dto.response.Beam;
@@ -17,20 +18,14 @@ import org.arcctg.deepl.model.dto.response.Translation;
 import org.arcctg.service.api.ResponseParserService;
 
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class DefaultResponseParserService implements ResponseParserService {
 
     private final ObjectMapper objectMapper;
 
-    @Inject
-    public DefaultResponseParserService(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
-
     @Override
     @SneakyThrows
     public List<Sentence> parseTextSegmentation(HttpResponse<String> httpResponse) {
-        checkForException(httpResponse);
-
         ResponseTemplate response = objectMapper.readValue(httpResponse.body(), ResponseTemplate.class);
 
         return getSentencesFromResponse(response);
@@ -39,8 +34,6 @@ public class DefaultResponseParserService implements ResponseParserService {
     @Override
     @SneakyThrows
     public String parseTextTranslation(HttpResponse<String> httpResponse) {
-        checkForException(httpResponse);
-
         ResponseTemplate response = objectMapper.readValue(httpResponse.body(),
             ResponseTemplate.class);
 
@@ -75,13 +68,6 @@ public class DefaultResponseParserService implements ResponseParserService {
             }
         }
 
-        return stringBuilder.toString();
-    }
-
-    private static void checkForException(HttpResponse<String> httpResponse) {
-        if (httpResponse.statusCode() != 200) {
-            throw new RuntimeException("Error: %d - %s".formatted(httpResponse.statusCode(),
-                httpResponse.body()));
-        }
+        return stringBuilder.toString().trim();
     }
 }

@@ -7,13 +7,11 @@ public class Utility {
 
     private Utility(){}
 
-    public static IdGenerator getIdGenerator() {
+    public static int getRandomIdInSetRange() {
         final int min = 100_000;
         final int max = 100_000_000;
 
-        int randomId = new Random().nextInt(min, max);
-
-        return new IdGenerator(randomId);
+        return new Random().nextInt(min, max);
     }
 
     public static long generateTimestamp(List<String> sentences) {

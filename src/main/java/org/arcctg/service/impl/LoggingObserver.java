@@ -1,12 +1,12 @@
 package org.arcctg.service.impl;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.arcctg.service.api.EventData;
 import org.arcctg.service.api.Observer;
 
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class LoggingObserver implements Observer {
 
     private final String name;

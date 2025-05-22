@@ -6,6 +6,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Queue;
+import lombok.RequiredArgsConstructor;
 import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.deepl.model.dto.common.Sentence;
 import org.arcctg.service.api.PayloadBuilderService;
@@ -15,27 +16,14 @@ import org.arcctg.service.api.ResponseParserService;
 import org.arcctg.service.api.SegmentationService;
 import org.arcctg.service.api.TranslationService;
 
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class TranslationSyncService implements TranslationService {
 
-    private final RequestHandlerService requestHandler;
+    private final @Assisted RequestHandlerService requestHandler;
     private final SegmentationService segmentationService;
     private final QueueRequestService queueRequestService;
     private final PayloadBuilderService payloadBuilderService;
     private final ResponseParserService responseParser;
-
-    @Inject
-    public TranslationSyncService(
-        @Assisted RequestHandlerService requestHandler,
-        SegmentationService segmentationService,
-        QueueRequestService queueRequestService,
-        PayloadBuilderService payloadBuilderService,
-        ResponseParserService responseParser) {
-        this.requestHandler = requestHandler;
-        this.segmentationService = segmentationService;
-        this.queueRequestService = queueRequestService;
-        this.payloadBuilderService = payloadBuilderService;
-        this.responseParser = responseParser;
-    }
 
     @Override
     public String process(String text, SourceTargetLangs langPair) {

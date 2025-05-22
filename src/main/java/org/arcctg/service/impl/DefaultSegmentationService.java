@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.arcctg.deepl.model.dto.common.Sentence;
 import org.arcctg.service.api.PayloadBuilderService;
 import org.arcctg.service.api.RequestBuilderService;
@@ -13,24 +14,13 @@ import org.arcctg.service.api.ResponseParserService;
 import org.arcctg.service.api.SegmentationService;
 
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class DefaultSegmentationService implements SegmentationService {
 
     private final RequestHandlerService requestHandler;
     private final PayloadBuilderService payloadBuilderService;
     private final RequestBuilderService requestBuilderService;
     private final ResponseParserService responseParser;
-
-    @Inject
-    public DefaultSegmentationService(
-        RequestHandlerService requestHandler,
-        PayloadBuilderService payloadBuilderService,
-        RequestBuilderService requestBuilderService,
-        ResponseParserService responseParser) {
-        this.requestHandler = requestHandler;
-        this.payloadBuilderService = payloadBuilderService;
-        this.requestBuilderService = requestBuilderService;
-        this.responseParser = responseParser;
-    }
 
     @Override
     public List<Sentence> process(String text) {

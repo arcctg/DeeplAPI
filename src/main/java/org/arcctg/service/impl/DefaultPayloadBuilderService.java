@@ -1,15 +1,18 @@
 package org.arcctg.service.impl;
 
 import static org.arcctg.util.Utility.generateTimestamp;
-import static org.arcctg.util.Utility.getIdGenerator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.deepl.model.dto.common.Sentence;
@@ -17,12 +20,14 @@ import org.arcctg.deepl.model.dto.request.Job;
 import org.arcctg.deepl.model.dto.request.PayloadTemplate;
 import org.arcctg.deepl.model.dto.request.Weight;
 import org.arcctg.service.api.PayloadBuilderService;
-import org.arcctg.util.IdGenerator;
 
 @Singleton
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class DefaultPayloadBuilderService implements PayloadBuilderService {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final IdGenerator id = getIdGenerator();
+
+    private final ObjectMapper objectMapper;
+    @Named("Payload id")
+    private final AtomicInteger id;
 
     @Override
     @SneakyThrows
@@ -32,7 +37,7 @@ public class DefaultPayloadBuilderService implements PayloadBuilderService {
         PayloadTemplate payloadTemplate = PayloadTemplate.builder()
             .jsonrpc("2.0")
             .method("LMT_split_text")
-            .id(id.next())
+            .id(id.incrementAndGet())
             .params(paramsBuilder -> paramsBuilder
                 .texts(texts)
                 .lang(langBuilder -> langBuilder
@@ -71,13 +76,13 @@ public class DefaultPayloadBuilderService implements PayloadBuilderService {
     }
 
     @SneakyThrows
-    public static String buildForTranslation(List<Job> jobs, SourceTargetLangs langPair,
+    public String buildForTranslation(List<Job> jobs, SourceTargetLangs langPair,
         List<String> batchText) {
 
         PayloadTemplate payloadTemplate = PayloadTemplate.builder()
             .jsonrpc("2.0")
             .method("LMT_handle_jobs")
-            .id(id.next())
+            .id(id.incrementAndGet())
             .params(paramsBuilder -> paramsBuilder
                 .jobs(jobs)
                 .priority(1)
@@ -104,13 +109,14 @@ public class DefaultPayloadBuilderService implements PayloadBuilderService {
         return modifyPayloadForDeepl(payload);
     }
 
-    private static String modifyPayloadForDeepl(String payload) {
-        String replacement = ((id.get() + 3) % 13 == 0 || (id.get() + 5) % 29 == 0) ? "method\" : " : "method\": ";
+    private String modifyPayloadForDeepl(String payload) {
+        String replacement =
+            ((id.get() + 3) % 13 == 0 || (id.get() + 5) % 29 == 0) ? "method\" : " : "method\": ";
 
         return payload.replace("method\":", replacement);
     }
 
-    private static List<List<Job>> buildJobsBatches(List<Sentence> allSentences) {
+    private List<List<Job>> buildJobsBatches(List<Sentence> allSentences) {
         List<List<Job>> jobBatchesList = new ArrayList<>();
         List<Job> jobBatch = new ArrayList<>();
 
@@ -132,7 +138,7 @@ public class DefaultPayloadBuilderService implements PayloadBuilderService {
         return jobBatchesList;
     }
 
-    private static Job createJobForSentence(int sentenceIndex, List<Sentence> allSentences) {
+    private Job createJobForSentence(int sentenceIndex, List<Sentence> allSentences) {
         List<String> rawEnContextAfter = createContextAfter(sentenceIndex, allSentences);
         List<String> rawEnContextBefore = createContextBefore(sentenceIndex, allSentences);
 
@@ -145,7 +151,7 @@ public class DefaultPayloadBuilderService implements PayloadBuilderService {
             .build();
     }
 
-    private static List<String> createContextAfter(int sentenceIndex, List<Sentence> allSentences) {
+    private List<String> createContextAfter(int sentenceIndex, List<Sentence> allSentences) {
         List<String> rawEnContextAfter = new ArrayList<>();
 
         if (sentenceIndex != allSentences.size() - 1) {
@@ -155,7 +161,7 @@ public class DefaultPayloadBuilderService implements PayloadBuilderService {
         return rawEnContextAfter;
     }
 
-    private static List<String> createContextBefore(int sentenceIndex, List<Sentence> allSentences) {
+    private List<String> createContextBefore(int sentenceIndex, List<Sentence> allSentences) {
         List<String> rawEnContextBefore = new ArrayList<>();
         int j = sentenceIndex >= 5 ? sentenceIndex - 5 : 0;
 
@@ -167,14 +173,14 @@ public class DefaultPayloadBuilderService implements PayloadBuilderService {
     }
 
     @SneakyThrows
-    private static int getBytesLength(List<Job> jobBatch, Job job) {
+    private int getBytesLength(List<Job> jobBatch, Job job) {
         String batchStr = objectMapper.writeValueAsString(jobBatch);
         String jobStr = objectMapper.writeValueAsString(job);
 
         return (batchStr + jobStr).getBytes(StandardCharsets.UTF_8).length;
     }
 
-    private static List<String> extractBatchText(List<Job> batch) {
+    private List<String> extractBatchText(List<Job> batch) {
         return batch.stream()
             .flatMap(job -> job.getSentences().stream())
             .map(Sentence::getText)

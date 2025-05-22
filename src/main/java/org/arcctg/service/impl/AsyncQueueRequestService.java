@@ -6,17 +6,14 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.arcctg.service.api.QueueRequestService;
 import org.arcctg.service.api.RequestBuilderService;
 
+@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class AsyncQueueRequestService implements QueueRequestService {
 
     private final RequestBuilderService requestBuilderService;
-
-    @Inject
-    public AsyncQueueRequestService(RequestBuilderService requestBuilderService) {
-        this.requestBuilderService = requestBuilderService;
-    }
 
     @Override
     public Queue<HttpRequest> process(List<String> payloads) {
