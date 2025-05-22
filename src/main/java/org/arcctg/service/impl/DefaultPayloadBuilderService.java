@@ -4,6 +4,7 @@ import static org.arcctg.util.Utility.generateTimestamp;
 import static org.arcctg.util.Utility.getIdGenerator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Singleton;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +19,7 @@ import org.arcctg.deepl.model.dto.request.Weight;
 import org.arcctg.service.api.PayloadBuilderService;
 import org.arcctg.util.IdGenerator;
 
+@Singleton
 public class DefaultPayloadBuilderService implements PayloadBuilderService {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final IdGenerator id = getIdGenerator();

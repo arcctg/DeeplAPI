@@ -1,6 +1,7 @@
 package org.arcctg.service.impl;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.arcctg.service.api.RequestHandlerService;
 import org.arcctg.service.api.ResponseParserService;
 import org.arcctg.service.api.SegmentationService;
 
+@Singleton
 public class DefaultSegmentationService implements SegmentationService {
 
     private final RequestHandlerService requestHandler;

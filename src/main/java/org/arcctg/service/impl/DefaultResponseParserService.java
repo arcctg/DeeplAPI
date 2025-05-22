@@ -2,6 +2,7 @@ package org.arcctg.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import org.arcctg.deepl.model.dto.response.Text;
 import org.arcctg.deepl.model.dto.response.Translation;
 import org.arcctg.service.api.ResponseParserService;
 
+@Singleton
 public class DefaultResponseParserService implements ResponseParserService {
 
     private final ObjectMapper objectMapper;

@@ -1,11 +1,13 @@
 package org.arcctg.service.impl;
 
+import com.google.inject.Singleton;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import lombok.SneakyThrows;
 import org.arcctg.service.api.RequestBuilderService;
 
+@Singleton
 public class DefaultRequestBuilderService implements RequestBuilderService {
 
     private static final String API_URL = "https://www2.deepl.com/jsonrpc";
