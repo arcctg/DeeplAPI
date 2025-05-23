@@ -26,7 +26,10 @@ public class DefaultResponseParserService implements ResponseParserService {
     @Override
     @SneakyThrows
     public List<Sentence> parseTextSegmentation(HttpResponse<String> httpResponse) {
-        ResponseTemplate response = objectMapper.readValue(httpResponse.body(), ResponseTemplate.class);
+        checkForException(httpResponse);
+
+        ResponseTemplate response = objectMapper.readValue(httpResponse.body(),
+            ResponseTemplate.class);
 
         return getSentencesFromResponse(response);
     }
@@ -34,6 +37,8 @@ public class DefaultResponseParserService implements ResponseParserService {
     @Override
     @SneakyThrows
     public String parseTextTranslation(HttpResponse<String> httpResponse) {
+        checkForException(httpResponse);
+
         ResponseTemplate response = objectMapper.readValue(httpResponse.body(),
             ResponseTemplate.class);
 
@@ -69,5 +74,12 @@ public class DefaultResponseParserService implements ResponseParserService {
         }
 
         return stringBuilder.toString().trim();
+    }
+
+    private static void checkForException(HttpResponse<String> httpResponse) {
+        if (httpResponse.statusCode() < 200 || httpResponse.statusCode() >= 300) {
+            throw new RuntimeException("%d - %s".formatted(httpResponse.statusCode(),
+                httpResponse.body()));
+        }
     }
 }

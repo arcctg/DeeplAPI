@@ -32,9 +32,7 @@ public class TranslationObservableService implements TranslationService, Subject
             return result;
         } catch (Exception e) {
             notify(new TranslationFailureData(text, langPair, e));
-            log.warn("TranslationObservableService: Caught exception, Error: {}", e.getMessage());
-
-            return "";
+            throw new RuntimeException("Translation failed " + e.getMessage());
         }
     }
 

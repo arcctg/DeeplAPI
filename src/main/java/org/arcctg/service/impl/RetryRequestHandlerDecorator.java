@@ -27,7 +27,7 @@ public class RetryRequestHandlerDecorator extends BaseRequestHandlerDecorator {
 
     @Override
     public HttpResponse<String> sendRequest(HttpRequest request) {
-        Exception lastException = null;
+        String lastErrorMessage = "Unknown error";
 
         for (int attempts = 1; attempts <= maxRetries + 1; attempts++) {
             try {
@@ -37,9 +37,9 @@ public class RetryRequestHandlerDecorator extends BaseRequestHandlerDecorator {
                     return response;
                 }
 
-                lastException = createHttpErrorException(response);
+                lastErrorMessage = createHttpErrorMessage(response);
             } catch (Exception e) {
-                lastException = e;
+                lastErrorMessage = e.getMessage();
             }
 
             if (attempts > maxRetries) {
@@ -49,16 +49,17 @@ public class RetryRequestHandlerDecorator extends BaseRequestHandlerDecorator {
             waitBeforeRetry(attempts);
         }
 
-        throw new RuntimeException("Failed after " + maxRetries + " retry attempts", lastException);
+        throw new RuntimeException(
+            "Failed after %d retry attempts. Last Error message: %s".formatted(maxRetries,
+                lastErrorMessage));
     }
 
     private boolean isSuccessResponse(HttpResponse<String> response) {
         return response.statusCode() >= 200 && response.statusCode() < 300;
     }
 
-    private RuntimeException createHttpErrorException(HttpResponse<String> response) {
-        return new RuntimeException(
-            "HTTP Error %d: %s".formatted(response.statusCode(), response.body()));
+    private String createHttpErrorMessage(HttpResponse<String> response) {
+        return "HTTP Error %d: %s".formatted(response.statusCode(), response.body());
     }
 
     @SneakyThrows

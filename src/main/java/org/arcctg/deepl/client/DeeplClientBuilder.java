@@ -11,6 +11,7 @@ import org.arcctg.service.api.TranslationServiceFactory;
 import org.arcctg.service.impl.DefaultRequestHandler;
 import org.arcctg.service.impl.RetryRequestHandlerDecorator;
 import org.arcctg.service.impl.TranslationCacheService;
+import org.arcctg.service.impl.TranslationExceptionHandlerService;
 import org.arcctg.service.impl.TranslationObservableService;
 
 public class DeeplClientBuilder {
@@ -62,7 +63,7 @@ public class DeeplClientBuilder {
         translationService = applyCacheIfEnabled(translationService);
         translationService = applyObserversIfEnabled(translationService);
 
-        return new DeeplClient(translationService);
+        return new DeeplClient(new TranslationExceptionHandlerService(translationService));
     }
 
     private RequestHandlerService createRequestHandler() {
