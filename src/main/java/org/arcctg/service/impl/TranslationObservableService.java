@@ -9,9 +9,6 @@ import org.arcctg.service.api.EventData;
 import org.arcctg.service.api.Observer;
 import org.arcctg.service.api.Subject;
 import org.arcctg.service.api.TranslationService;
-import org.arcctg.service.dto.TranslationAttemptData;
-import org.arcctg.service.dto.TranslationFailureData;
-import org.arcctg.service.dto.TranslationSuccessData;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,16 +19,16 @@ public class TranslationObservableService implements TranslationService, Subject
 
     @Override
     public String process(String text, SourceTargetLangs langPair) {
-        notify(new TranslationAttemptData(text, langPair));
+        notify(new TranslationAttemptData());
 
         try {
             String result = translationService.process(text, langPair);
 
-            notify(new TranslationSuccessData(text, langPair, result));
+            notify(new TranslationSuccessData());
 
             return result;
         } catch (Exception e) {
-            notify(new TranslationFailureData(text, langPair, e));
+            notify(new TranslationFailureData());
             throw new RuntimeException("Translation failed " + e.getMessage());
         }
     }

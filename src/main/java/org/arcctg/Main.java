@@ -28,5 +28,7 @@ public class Main {
         log.info("{}\n", client.translate(text, langPair));
 
         log.info(client.translate(text, langPair));
+
+        metricsObserver.printStats();
     }
 }
