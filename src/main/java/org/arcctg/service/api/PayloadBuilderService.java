@@ -4,7 +4,7 @@ import com.google.inject.ImplementedBy;
 import java.util.List;
 import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.deepl.model.dto.common.Sentence;
-import org.arcctg.service.impl.DefaultPayloadBuilderService;
+import org.arcctg.service.impl.request.DefaultPayloadBuilderService;
 
 @ImplementedBy(DefaultPayloadBuilderService.class)
 public interface PayloadBuilderService {

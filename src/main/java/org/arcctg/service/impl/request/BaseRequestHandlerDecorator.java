@@ -1,12 +1,11 @@
-package org.arcctg.service.impl;
+package org.arcctg.service.impl.request;
 
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.arcctg.service.api.RequestHandlerService;
 
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@RequiredArgsConstructor()
 public abstract class BaseRequestHandlerDecorator implements RequestHandlerService {
 
     private final RequestHandlerService requestHandler;

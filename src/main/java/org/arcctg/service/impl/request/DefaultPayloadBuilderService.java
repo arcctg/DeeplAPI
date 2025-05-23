@@ -1,4 +1,4 @@
-package org.arcctg.service.impl;
+package org.arcctg.service.impl.request;
 
 import static org.arcctg.util.Utility.generateTimestamp;
 

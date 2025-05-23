@@ -1,4 +1,4 @@
-package org.arcctg.service.impl;
+package org.arcctg.service.impl.translation;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

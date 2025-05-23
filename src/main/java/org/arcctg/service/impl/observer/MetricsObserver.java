@@ -1,8 +1,11 @@
-package org.arcctg.service.impl;
+package org.arcctg.service.impl.observer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.arcctg.service.api.EventData;
 import org.arcctg.service.api.Observer;
+import org.arcctg.service.impl.translation.TranslationAttemptData;
+import org.arcctg.service.impl.translation.TranslationFailureData;
+import org.arcctg.service.impl.translation.TranslationSuccessData;
 
 @Slf4j
 public class MetricsObserver implements Observer {

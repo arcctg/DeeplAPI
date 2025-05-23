@@ -1,4 +1,4 @@
-package org.arcctg.service.impl;
+package org.arcctg.service.impl.translation;
 
 import lombok.extern.slf4j.Slf4j;
 import org.arcctg.cache.impl.LRUCache;

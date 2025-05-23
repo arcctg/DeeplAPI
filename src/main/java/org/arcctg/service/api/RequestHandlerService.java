@@ -3,7 +3,7 @@ package org.arcctg.service.api;
 import com.google.inject.ImplementedBy;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import org.arcctg.service.impl.DefaultRequestHandler;
+import org.arcctg.service.impl.request.DefaultRequestHandler;
 
 @ImplementedBy(DefaultRequestHandler.class)
 public interface RequestHandlerService {

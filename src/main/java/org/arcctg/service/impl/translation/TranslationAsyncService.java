@@ -1,11 +1,14 @@
-package org.arcctg.service.impl;
+package org.arcctg.service.impl.translation;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.arcctg.deepl.model.SourceTargetLangs;
 import org.arcctg.deepl.model.dto.common.Sentence;
 import org.arcctg.service.api.PayloadBuilderService;
@@ -15,7 +18,7 @@ import org.arcctg.service.api.ResponseParserService;
 import org.arcctg.service.api.SegmentationService;
 import org.arcctg.service.api.TranslationService;
 
-public class TranslationSyncService implements TranslationService {
+public class TranslationAsyncService implements TranslationService {
 
     private final RequestHandlerService requestHandler;
     private final SegmentationService segmentationService;
@@ -24,7 +27,7 @@ public class TranslationSyncService implements TranslationService {
     private final ResponseParserService responseParser;
 
     @Inject
-    public TranslationSyncService(
+    public TranslationAsyncService(
         @Assisted RequestHandlerService requestHandler,
         SegmentationService segmentationService,
         QueueRequestService queueRequestService,
@@ -45,18 +48,33 @@ public class TranslationSyncService implements TranslationService {
     }
 
     private String translateSentences(List<Sentence> sentences, SourceTargetLangs langPair) {
-        StringBuilder result = new StringBuilder();
         List<String> payloads = payloadBuilderService.buildForAllSentences(sentences, langPair);
         Queue<HttpRequest> requestQueue = queueRequestService.process(payloads);
+        List<Supplier<String>> tasks = buildTranslationTasks(requestQueue);
+        CompletableFuture<String>[] futures = createFutures(tasks);
 
-        while (!requestQueue.isEmpty()) {
-            HttpRequest request = requestQueue.poll();
-            HttpResponse<String> response = requestHandler.sendRequest(request);
-            String translatedText = responseParser.parseTextTranslation(response);
+        return collectTranslations(futures);
+    }
 
-            result.append(translatedText);
-        }
+    @SuppressWarnings("unchecked")
+    private CompletableFuture<String>[] createFutures(List<Supplier<String>> tasks) {
+        return tasks.stream()
+            .map(CompletableFuture::supplyAsync)
+            .toArray(CompletableFuture[]::new);
+    }
 
-        return result.toString().trim();
+    private String collectTranslations(CompletableFuture<String>[] futures) {
+        return CompletableFuture.allOf(futures)
+            .thenApply(v -> Stream.of(futures)
+                .map(CompletableFuture::join)
+                .collect(Collectors.joining("")))
+            .join();
+    }
+
+    private List<Supplier<String>> buildTranslationTasks(Queue<HttpRequest> requestQueue) {
+        return requestQueue.stream()
+            .map(request -> (Supplier<String>) () ->
+                responseParser.parseTextTranslation(requestHandler.sendRequest(request))
+            ).toList();
     }
 }

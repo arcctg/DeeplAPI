@@ -1,4 +1,4 @@
-package org.arcctg.service.impl;
+package org.arcctg.service.impl.request;
 
 import com.google.inject.Singleton;
 import java.net.URI;

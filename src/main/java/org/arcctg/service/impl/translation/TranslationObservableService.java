@@ -1,4 +1,4 @@
-package org.arcctg.service.impl;
+package org.arcctg.service.impl.translation;
 
 import java.util.ArrayList;
 import java.util.List;

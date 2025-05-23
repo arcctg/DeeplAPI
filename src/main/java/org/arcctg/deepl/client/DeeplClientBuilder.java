@@ -8,11 +8,11 @@ import org.arcctg.service.api.Observer;
 import org.arcctg.service.api.RequestHandlerService;
 import org.arcctg.service.api.TranslationService;
 import org.arcctg.service.api.TranslationServiceFactory;
-import org.arcctg.service.impl.DefaultRequestHandler;
-import org.arcctg.service.impl.RetryRequestHandlerDecorator;
-import org.arcctg.service.impl.TranslationCacheService;
-import org.arcctg.service.impl.TranslationExceptionHandlerService;
-import org.arcctg.service.impl.TranslationObservableService;
+import org.arcctg.service.impl.request.DefaultRequestHandler;
+import org.arcctg.service.impl.request.RetryRequestHandlerDecorator;
+import org.arcctg.service.impl.translation.TranslationCacheService;
+import org.arcctg.service.impl.translation.TranslationExceptionHandlerService;
+import org.arcctg.service.impl.translation.TranslationObservableService;
 
 public class DeeplClientBuilder {
 

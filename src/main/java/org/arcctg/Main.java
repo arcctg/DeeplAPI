@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.arcctg.deepl.client.DeeplClient;
 import org.arcctg.deepl.model.Language;
 import org.arcctg.deepl.model.SourceTargetLangs;
-import org.arcctg.service.impl.LoggingObserver;
-import org.arcctg.service.impl.MetricsObserver;
+import org.arcctg.service.impl.observer.LoggingObserver;
+import org.arcctg.service.impl.observer.MetricsObserver;
 
 @Slf4j
 public class Main {

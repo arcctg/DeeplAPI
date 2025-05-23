@@ -1,4 +1,4 @@
-package org.arcctg.service.impl;
+package org.arcctg.service.impl.translation;
 
 import org.arcctg.service.api.EventData;
 

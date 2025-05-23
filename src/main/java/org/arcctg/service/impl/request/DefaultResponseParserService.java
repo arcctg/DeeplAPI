@@ -1,4 +1,4 @@
-package org.arcctg.service.impl;
+package org.arcctg.service.impl.request;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
